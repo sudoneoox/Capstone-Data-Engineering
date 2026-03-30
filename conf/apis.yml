@@ -1,0 +1,29 @@
+apis:
+  bls:
+    description: "Bureau of Labor Statistics Public API"
+    base_url: https://api.bls.gov/publicAPI/v2/timeseries/data/
+    api_key_env: "BLS_API_KEY"
+
+  adzuna:
+    description: "Adzuna Public API"
+    base_url: https://api.adzuna.com/v1/api/jobs/us/search # Here you can use /1 to get page 1
+    app_id_env: "ADZUNA_APP_ID"
+    api_key_env: "ADZUNA_API_KEY"
+    
+  fred:
+    description: "FRED Public API"
+    base_url: null # Handled by Fred package
+    api_key_env: "FRED_API_KEY"
+
+  acs:
+    description: "Census Bureau ACS API"
+    base_url: null # Handled by Census package
+    api_key_env: "ACS_API_KEY"
+
+databricks:
+    host_env: "DATABRICKS_HOST"
+    token_env: "DATABRICKS_TOKEN"
+
+download_urls:
+  onet: 
+    base_url: https://www.onetcenter.org/dl_files/database

@@ -241,6 +241,8 @@ dependencies = [
     { name = "fredapi" },
     { name = "pandas" },
     { name = "prefect" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -252,6 +254,8 @@ requires-dist = [
     { name = "fredapi", specifier = ">=0.5.2" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "prefect", specifier = ">=3.6.24" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
 [[package]]
