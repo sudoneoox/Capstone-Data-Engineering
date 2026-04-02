@@ -52,6 +52,15 @@ class AppConfig:
     settings: Settings
     metadata: dict[str, Any]
 
+    def validate(self):
+        missing = [
+            k for k, v in vars(self.settings).items() if isinstance(v, str) and not v
+        ]
+        if missing:
+            raise EnvironmentError(
+                f"Missing secrets: {missing}. " f"Check .env.secrets file."
+            )
+
     def api_meta(self, name: str) -> dict[str, Any]:
         try:
             return self.metadata["apis"][name]
