@@ -7,6 +7,7 @@ logs/*
 # Ingestion files
 dbt/seeds/kaggle/*
 dbt/seeds/onet/*
+dbt/seeds/apis/bls/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
