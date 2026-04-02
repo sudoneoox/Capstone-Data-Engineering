@@ -51,11 +51,11 @@ def ingest_seeds(force: bool = False) -> None:
 
     from orchestration.tasks.ingestion_tasks import (
         ensure_kaggle_seeds,
-        # TODO: ensure_onet_seeds
+        ensure_onet_seeds,
     )
 
     ensure_kaggle_seeds(force=force)
-    # TODO: ensure_onet_seeds(force=force)
+    ensure_onet_seeds(force=force)
 
 
 # TODO:
