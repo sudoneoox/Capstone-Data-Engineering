@@ -2,7 +2,10 @@
 .env.secrets
 .env.secrets.yml
 .env.secrets.yaml
+logs/*
 
+# Ingestion files
+dbt/seeds/kaggle/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
