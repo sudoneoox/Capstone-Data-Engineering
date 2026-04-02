@@ -14,7 +14,7 @@ import argparse
 import logging
 import logging.config
 import sys
-import datetime
+from datetime import datetime
 import yaml
 from prefect import flow
 from src.utils.config import ROOT, get_config
@@ -65,11 +65,23 @@ def ingest_apis() -> None:
     Recurring: pull fresh data from live APIs
     Runs on every pipeline execution
     """
-    # TODO: from orchestration.tasks.ingestion_tasks import (
-    #     fetch_adzuna_jobs,
-    #     fetch_bls_series,
-    #     fetch_fred_series
-    # )
+    # TODO:
+    from orchestration.tasks.ingestion_tasks import (
+        #     fetch_adzuna_jobs,
+        #     fetch_fred_series
+        fetch_bls_series,
+    )
+
+    current_year = datetime.now().year
+
+    # INFO: ---- BLS ----
+    # OES wages, JOLTS openings, CES employment, LAUS unemployment
+    bls_series = [
+        "LNS14000000",  # unemployment rate
+        "CES0000000001",  # total nonfarm employment
+        "JTS000000000000000JOL",  # JOLTS job openings
+    ]
+    fetch_bls_series(bls_series, start_year=current_year - 3, end_year=current_year)
 
 
 # TODO:
