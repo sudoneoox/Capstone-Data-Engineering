@@ -17,13 +17,13 @@ from prefect import task
 
 logger = logging.getLogger(__name__)
 
-# Where raw API responses land before dbt touches them
-SEED_API_DIR = ROOT / "dbt" / "seeds" / "apis"
+# Where raw API responses land before being pushed to a cloud provider
+API_DATA_DIR = ROOT / "data" / "api_raw"
 
 
 def _write_seed_api(source: str, filename: str, payload: object) -> Path:
-    """Write raw JSON payload to the seed/api landing zone."""
-    dest_dir = SEED_API_DIR / source
+    """Write raw JSON payload to the API data landing zone."""
+    dest_dir = API_DATA_DIR / source
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / filename
     dest.write_text(json.dumps(payload, indent=2, default=str))
@@ -64,7 +64,7 @@ def fetch_bls_series(
     start_year: int,
     end_year: int,
 ) -> Path:
-    """Fetch BLS time-series and land raw JSON in dbt/seeds/apis/bls/"""
+    """Fetch BLS time-series and land raw JSON in API_DATA_DIR"""
 
     from src.ingestion.bls_client import BLSClient
 
@@ -83,7 +83,7 @@ def fetch_adzuna_jobs(
     where: str = "",
     max_pages: int = 10,
 ) -> Path:
-    """Paginate Adzuna search and load results in dbt/seeds/apis/adzuna"""
+    """Paginate Adzuna search and load results in API_DATA_DIR"""
     from src.ingestion.adzuna_client import AdzunaClient
 
     client = AdzunaClient()
@@ -105,7 +105,7 @@ def fetch_fred_series(
     start: str | None = None,
     end: str | None = None,
 ) -> Path:
-    """Fetch FRED series and land as JSON in dbt/seeds/apis/fred"""
+    """Fetch FRED series and land as JSON in API_DATA_DIR"""
     from src.ingestion.fred_client import FREDClient
 
     client = FREDClient()
@@ -137,3 +137,16 @@ def fetch_acs_metro_profiles() -> Path:
     client = ACSClient()
     data = client.fetch_metro_profiles(variables, fips_codes)
     return _write_seed_api("acs", "acs_metro_profiles.json", data)
+
+
+# --------------------------------------------
+# INFO: Databricks
+# --------------------------------------------
+
+
+@task(retries=1, tags=["ingestion", "databricks"])
+def upload_api_sources_to_databricks():
+    """Upload API Files to Databricks using sdk"""
+    from src.ingestion.databricks_uploader import upload_to_databricks
+
+    upload_to_databricks()
