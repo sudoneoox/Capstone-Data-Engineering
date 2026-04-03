@@ -26,15 +26,32 @@ pull:
 # the deployments section allows you to provide configuration
 # for deploying flows
 deployments:
-- name: null
-  version: null
-  tags: []
-  description: null
-  schedule: {}
-  flow_name: null
-  entrypoint: null
-  parameters: {}
-  work_pool:
-    name: null
-    work_queue_name: null
-    job_variables: {}
+  - name: daily-full-pipeline
+    entrypoint: orchestration/flows/daily_pipeline.py:daily_pipeline
+    parameters:
+      mode: full
+    schedule:
+      cron: "0 6 * * *"    # 6 AM UTC daily
+      timezone: "UTC"
+    tags:
+      - production
+      - scheduled
+ 
+  - name: api-refresh-only
+    entrypoint: orchestration/flows/daily_pipeline.py:daily_pipeline
+    parameters:
+      mode: apis
+    schedule: null          # on-demand only
+    tags:
+      - manual
+ 
+  - name: seed-refresh
+    entrypoint: orchestration/flows/daily_pipeline.py:daily_pipeline
+    parameters:
+      mode: seeds
+    schedule:
+      cron: "0 3 1 */3 *"  # 3 AM UTC, 1st of every 3rd month (quarterly)
+      timezone: "UTC"
+    tags:
+      - quarterly
+ 

@@ -27,3 +27,5 @@ databricks:
 download_urls:
   onet: 
     base_url: https://www.onetcenter.org/dl_files/database
+
+ingestion_config: "conf/ingestion.yaml"

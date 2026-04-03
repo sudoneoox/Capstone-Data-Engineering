@@ -93,7 +93,11 @@ def get_settings() -> Settings:
 
 @lru_cache(maxsize=1)
 def get_metadata() -> dict[str, Any]:
-    return _load_yaml(CONF_DIR / "apis.yml")
+    apis = _load_yaml(CONF_DIR / "apis.yml")
+    ingestion_path = CONF_DIR / "ingestion.yml"
+    if ingestion_path.exists():
+        apis["ingestion"] = _load_yaml(ingestion_path)
+    return apis
 
 
 @lru_cache(maxsize=1)
