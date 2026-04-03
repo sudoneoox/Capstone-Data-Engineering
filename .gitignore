@@ -8,6 +8,8 @@ logs/*
 dbt/seeds/kaggle/*
 dbt/seeds/onet/*
 dbt/seeds/apis/bls/*
+dbt/seeds/apis/adzuna/*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

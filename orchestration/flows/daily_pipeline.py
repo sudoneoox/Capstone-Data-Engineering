@@ -67,9 +67,9 @@ def ingest_apis() -> None:
     """
     # TODO:
     from orchestration.tasks.ingestion_tasks import (
-        #     fetch_adzuna_jobs,
         #     fetch_fred_series
         fetch_bls_series,
+        fetch_adzuna_jobs,
     )
 
     current_year = datetime.now().year
@@ -82,6 +82,17 @@ def ingest_apis() -> None:
         "JTS000000000000000JOL",  # JOLTS job openings
     ]
     fetch_bls_series(bls_series, start_year=current_year - 3, end_year=current_year)
+
+    # INFO: ---- Adzuna ----
+    search_queries = [
+        ("data engineer", ""),
+        ("data analyst", ""),
+        ("software engineer", ""),
+        ("data scientist", ""),
+    ]
+
+    for what, where in search_queries:
+        fetch_adzuna_jobs(what=what, where=where, max_pages=5)
 
 
 # TODO:

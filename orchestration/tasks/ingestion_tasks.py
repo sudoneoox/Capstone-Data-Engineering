@@ -69,7 +69,7 @@ def fetch_bls_series(
     start_year: int,
     end_year: int,
 ) -> Path:
-    """Fetch BLS time-series and land raw JSON in dbt/seeds/bls/"""
+    """Fetch BLS time-series and land raw JSON in dbt/seeds/apis/bls/"""
 
     from src.ingestion.bls_client import BLSClient
 
@@ -77,3 +77,25 @@ def fetch_bls_series(
     data = client.fetch_series(series_ids, start_year, end_year)
 
     return _write_seed_api("bls", f"bls_{start_year}_{end_year}.json", data)
+
+
+# --------------------------------------------
+# INFO: Adzuna
+# --------------------------------------------
+@task(retries=2, retry_delay_seconds=20, tags=["ingestion", "adzuna"])
+def fetch_adzuna_jobs(
+    what: str,
+    where: str = "",
+    max_pages: int = 10,
+) -> Path:
+    """Paginate Adzuna search and load results in dbt/seeds/apis/adzuna"""
+    from src.ingestion.adzuna_client import AdzunaClient
+
+    client = AdzunaClient()
+    jobs = client.search_jobs_all_pages(what, where, max_pages=max_pages)
+
+    safe_name = what.replace(" ", "_").lower()
+    safe_loc = where.replace(" ", "_").replace(",", "").lower() or "all"
+    filename = f"adzuna_{safe_name}_{safe_loc}.json"
+
+    return _write_seed_api("azduna", filename, jobs)
