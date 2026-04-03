@@ -5,11 +5,6 @@ Each task is independently retryable and logs into Prefect's UI
 Never run directly
 """
 
-# TODO: Add tasks for:
-# - fetch_bls_series
-# - fetch_adzuna_jobs
-# - fetch_fred_series
-
 from __future__ import annotations
 import logging
 import json
@@ -98,4 +93,28 @@ def fetch_adzuna_jobs(
     safe_loc = where.replace(" ", "_").replace(",", "").lower() or "all"
     filename = f"adzuna_{safe_name}_{safe_loc}.json"
 
-    return _write_seed_api("azduna", filename, jobs)
+    return _write_seed_api("adzuna", filename, jobs)
+
+
+# --------------------------------------------
+# INFO: FRED
+# --------------------------------------------
+@task(retries=2, retry_delay_seconds=20, tags=["ingestion", "fred"])
+def fetch_fred_series(
+    series_ids: list[str],
+    start: str | None = None,
+    end: str | None = None,
+) -> Path:
+    """Fetch FRED series and land as JSON in dbt/seeds/apis/fred"""
+    from src.ingestion.fred_client import FREDClient
+
+    client = FREDClient()
+    df = client.get_multiple_series(series_ids, start=start, end=end)
+
+    # Convert DataFrame -> Parquet
+    payload = {
+        "series_ids": series_ids,
+        "data": json.loads(df.to_json(orient="index", date_format="iso")),
+    }
+
+    return _write_seed_api("fred", "fred_series.json", payload)

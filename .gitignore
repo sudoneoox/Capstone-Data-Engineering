@@ -9,6 +9,8 @@ dbt/seeds/kaggle/*
 dbt/seeds/onet/*
 dbt/seeds/apis/bls/*
 dbt/seeds/apis/adzuna/*
+dbt/seeds/apis/fred/*
+
 
 
 # Byte-compiled / optimized / DLL files

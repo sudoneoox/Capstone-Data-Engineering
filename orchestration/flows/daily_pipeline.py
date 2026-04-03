@@ -65,9 +65,8 @@ def ingest_apis() -> None:
     Recurring: pull fresh data from live APIs
     Runs on every pipeline execution
     """
-    # TODO:
     from orchestration.tasks.ingestion_tasks import (
-        #     fetch_fred_series
+        fetch_fred_series,
         fetch_bls_series,
         fetch_adzuna_jobs,
     )
@@ -93,6 +92,15 @@ def ingest_apis() -> None:
 
     for what, where in search_queries:
         fetch_adzuna_jobs(what=what, where=where, max_pages=5)
+
+    # INFO: ---- FRED ----
+    fred_series = [
+        "UNRATE",  # unemployment rate (cross-check with BLS)
+        "JTSJOL",  # JOLTS openings (cross-check)
+        "CPIAUCSL",  # CPI for salary normalization
+        "FEDFUNDS",  # fed funds rate (economic context)
+    ]
+    fetch_fred_series(fred_series, start=f"{current_year - 3}-01-01")
 
 
 # TODO:
