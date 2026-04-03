@@ -10,6 +10,8 @@ dbt/seeds/onet/*
 dbt/seeds/apis/bls/*
 dbt/seeds/apis/adzuna/*
 dbt/seeds/apis/fred/*
+dbt/seeds/apis/acs/*
+
 
 
 

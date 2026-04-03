@@ -16,13 +16,22 @@ from __future__ import annotations
 import argparse
 import logging
 import logging.config
-import sys
 from datetime import datetime
 import yaml
 from prefect import flow
 from src.utils.config import ROOT, get_config
 
 logger = logging.getLogger(__name__)
+
+
+def _load_ingestion_config() -> dict:
+    """Load conf/ingestion.yml parameters"""
+    path = ROOT / "conf" / "ingestion.yml"
+    if not path.exists():
+        raise FileNotFoundError(f"Missing {path} -- copy from template")
+    with path.open() as f:
+        return yaml.safe_load(f)
+
 
 # ------------------------------------------------------------
 # INFO: Logging bootstrap (runs once before any flows)
@@ -66,48 +75,49 @@ def ingest_seeds(force: bool = False) -> None:
 def ingest_apis(enabled_apis: list[str] | None = None) -> None:
     """
     Recurring: pull fresh data from live APIs
-    Runs on every pipeline execution
+    Reads all parameters from conf/ingestion.yaml
     """
     from orchestration.tasks.ingestion_tasks import (
         fetch_fred_series,
         fetch_bls_series,
         fetch_adzuna_jobs,
+        fetch_acs_metro_profiles,
     )
 
-    enabled = set(enabled_apis or ["bls", "adzuna", "fred"])
+    ingestion = _load_ingestion_config()
     current_year = datetime.now().year
+    enabled = set(enabled_apis or ["bls", "adzuna", "fred", "acs"])
 
     # INFO: ---- BLS ----
     if "bls" in enabled:
         # OES wages, JOLTS openings, CES employment, LAUS unemployment
-        bls_series = [
-            "LNS14000000",  # unemployment rate
-            "CES0000000001",  # total nonfarm employment
-            "JTS000000000000000JOL",  # JOLTS job openings
-        ]
-        fetch_bls_series(bls_series, start_year=current_year - 3, end_year=current_year)
-
+        bls_conf = ingestion["bls"]
+        fetch_bls_series(
+            bls_conf["series_ids"],
+            start_year=current_year - bls_conf["lookback_years"],
+            end_year=current_year,
+        )
     # INFO: ---- Adzuna ----
     if "adzuna" in enabled:
-        search_queries = [
-            ("data engineer", ""),
-            ("data analyst", ""),
-            ("software engineer", ""),
-            ("data scientist", ""),
-        ]
-
-        for what, where in search_queries:
-            fetch_adzuna_jobs(what=what, where=where, max_pages=5)
+        adzuna_conf = ingestion["adzuna"]
+        for search in adzuna_conf["searches"]:
+            fetch_adzuna_jobs(
+                what=search["what"],
+                where=search.get("where", ""),
+                max_pages=search.get("max_pages", 5),
+            )
 
     # INFO: ---- FRED ----
     if "fred" in enabled:
-        fred_series = [
-            "UNRATE",  # unemployment rate (cross-check with BLS)
-            "JTSJOL",  # JOLTS openings (cross-check)
-            "CPIAUCSL",  # CPI for salary normalization
-            "FEDFUNDS",  # fed funds rate (economic context)
-        ]
-        fetch_fred_series(fred_series, start=f"{current_year - 3}-01-01")
+        fred_conf = ingestion["fred"]
+        fetch_fred_series(
+            fred_conf["series_ids"],
+            start=f"{current_year - fred_conf['lookback_years']}-01-01",
+        )
+
+    # INFO: ---- ACS ----
+    if "acs" in enabled:
+        fetch_acs_metro_profiles()
 
 
 # TODO:
@@ -185,8 +195,8 @@ def main() -> None:
     parser.add_argument(
         "--apis",
         nargs="+",
-        choices=["bls", "adzuna", "fred"],
-        default=["bls", "adzuna", "fred"],
+        choices=["bls", "adzuna", "fred", "acs"],
+        default=["bls", "adzuna", "fred", "acs"],
         help="Which APIs to run (default: all)",
     )
     args = parser.parse_args()

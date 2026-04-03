@@ -1,0 +1,116 @@
+# -------------------------------------------------------------------
+# Ingestion parameters for each API source.
+# -------------------------------------------------------------------
+bls:                           #INFO: For official labor-market time series
+  series_ids:
+    # Employment situation
+    - LNS14000000              # unemployment rate (seasonally adjusted)
+    - CES0000000001            # total nonfarm employment
+    - CES6500000001            # tech sector employment
+
+    # Labor force / employment ratios
+    - LNS11300060              # labor force participation rate, 25-54 years
+    - LNS12300060              # employment-population ratio, 25-54 years
+    # JOLTS
+    - JTS000000000000000JOL    # total job openings
+    - JTS000000000000000HIR    # total hires
+    - JTS000000000000000QUL    # total quits
+    # JOLTS separation details
+    - JTS000000000000000LDL    # layoffs and discharges
+    - JTS000000000000000TSL    # total separations
+    # OES wages (annual, requires separate handling)
+    # - OEUN000000000000011300000  # uncomment when ready
+  lookback_years: 3
+
+fred:                          #INFO: For macro context
+  series_ids:
+    - UNRATE                   # unemployment rate
+    - JTSJOL                   # JOLTS job openings
+    - CPIAUCSL                 # CPI (salary normalization)
+    - FEDFUNDS                 # fed funds rate
+    - ICSA                     # initial jobless claims (weekly)
+    - RSXFS                    # retail sales (economic health)
+    - PAYEMS                   # total nonfarm payroll employment
+    - EMRATIO                  # employment-population ratio
+    - LNS12300060              # prime-age employment-population ratio
+    - CIVPART                  # labor force participation rate
+    - OPHNFB                   # labor productivity, nonfarm business
+    - UEMPLT5                  # unemployed 5 weeks or less
+    - UEMP27OV                 # unemployed 27 weeks and over
+    - PCEPI                    # PCE price index
+    - DFF                      # effective federal funds rate
+
+  lookback_years: 10
+
+adzuna:                        #INFO: For live demand
+  searches:
+    # core data roles
+    - { what: "data engineer", where: "", max_pages: 3 }
+    - { what: "analytics engineer", where: "", max_pages: 3 }
+    - { what: "machine learning engineer", where: "", max_pages: 3 }
+
+    # analytics / BI
+    - { what: "\"business intelligence\" analyst", where: "", max_pages: 2 }
+    - { what: "\"analytics manager\"", where: "", max_pages: 2 }
+
+    # platform / infra adjacent
+    - { what: "platform engineer", where: "", max_pages: 2 }
+    - { what: "MLOps engineer", where: "", max_pages: 2 }
+
+    # seniority split
+    - { what: "\"senior data engineer\"", where: "", max_pages: 2 }
+    - { what: "\"entry level data analyst\"", where: "", max_pages: 2 }
+
+  max_days_old: 30
+
+acs:                           #INFO: For local demographic and workforce structure
+  # ACS 5-Year Data Profiles (DP tables)
+  # Fetched at the metro (CBSA) level for top tech metros
+  dataset: "acs/acs5/profile"
+  vintage: 2023                # most recent 5-year release
+  variables:
+    # Labor market
+    - DP03_0003PE              # % population 16+ in civilian labor force
+    - DP03_0004PE              # % civilian labor force employed
+    - DP03_0005PE              # % civilian labor force unemployed
+    - DP03_0009PE              # unemployment rate (calculated for civilian labor force)
+
+    # Commuting / remote work
+    - DP03_0021PE              # % workers 16+ using public transportation
+    - DP03_0024PE              # % workers 16+ who worked from home
+    - DP03_0025E               # mean travel time to work (minutes)
+
+    # Occupation / industry mix
+    - DP03_0027PE              # % employed in management, business, science, and arts occupations
+    - DP03_0039PE              # % employed in information industry
+    - DP03_0040PE              # % employed in finance/insurance/real estate/rental/leasing
+    - DP03_0041PE              # % employed in professional/scientific/management/admin/waste services
+
+    # Education / digital access
+    - DP02_0068PE              # % population 25+ with bachelor's degree or higher
+    - DP02_0067PE              # % population 25+ with graduate or professional degree
+    - DP02_0154PE              # % households with broadband Internet subscription
+
+    # Income / inequality
+    - DP03_0062E               # median household income (dollars)
+    - DP03_0093E               # median earnings, male full-time year-round workers
+    - DP03_0094E               # median earnings, female full-time year-round workers
+    - DP03_0119PE              # poverty rate for all families
+    - DP03_0128PE              # poverty rate for all people
+
+  geographies:
+    - {name: "San Francisco-Oakland", fips: "41860"}
+    - {name: "San Jose-Sunnyvale", fips: "41940"}
+    - {name: "Seattle-Tacoma", fips: "42660"}
+    - {name: "Austin-Round Rock", fips: "12420"}
+    - {name: "New York-Newark", fips: "35620"}
+    - {name: "Boston-Cambridge", fips: "14460"}
+    - {name: "Washington-Arlington", fips: "47900"}
+    - {name: "Denver-Aurora", fips: "19740"}
+    - {name: "Los Angeles-Long Beach", fips: "31080"}
+    - {name: "Chicago-Naperville", fips: "16980"}
+    - {name: "Dallas-Fort Worth", fips: "19100"}
+    - {name: "Atlanta-Sandy Springs", fips: "12060"}
+    - {name: "Raleigh-Cary", fips: "39580"}
+    - {name: "Minneapolis-St Paul", fips: "33460"}
+    - {name: "Phoenix-Mesa", fips: "38060"}

@@ -12,7 +12,7 @@ from pathlib import Path
 from tracemalloc import start
 
 
-from src.utils.config import ROOT
+from src.utils.config import ROOT, get_config
 from prefect import task
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def _write_seed_api(source: str, filename: str, payload: object) -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / filename
     dest.write_text(json.dumps(payload, indent=2, default=str))
-    logger.info("Wrote bronze file: %s", dest)
+    logger.info("Wrote json file: %s", dest)
     return dest
 
 
@@ -118,3 +118,22 @@ def fetch_fred_series(
     }
 
     return _write_seed_api("fred", "fred_series.json", payload)
+
+
+# --------------------------------------------
+# INFO: ACS (Census Bureau - annual refresh)
+# --------------------------------------------
+@task(retries=2, retry_delay_seconds=30, tags=["ingestion", "acs"])
+def fetch_acs_metro_profiles() -> Path:
+    """Fetch ACS demographic/economic profiles for target metros"""
+    from src.ingestion.acs_client import ACSClient
+
+    cfg = get_config()
+    ingestion = cfg.metadata.get("ingestion", {}).get("acs", {})
+    variables = ingestion.get("variables", [])
+    geos = ingestion.get("geographies", [])
+    fips_codes = [g["fips"] for g in geos]
+
+    client = ACSClient()
+    data = client.fetch_metro_profiles(variables, fips_codes)
+    return _write_seed_api("acs", "acs_metro_profiles.json", data)
