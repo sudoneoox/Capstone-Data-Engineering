@@ -127,18 +127,19 @@ def transform() -> None:
     Run dbt: seeds -> bronze -> silver -> gold -> docs (testing in between)
     Prefect manages stage ordering: dbt manages model dependencies
     """
-    # TODO: from orchestration.tasks.dbt_tasks import (
-    #     dbt_build_gold,
-    #     dbt_build_silver,
-    #     dbt_build_bronze,
-    #     dbt_docs_generate,
-    #     dbt_seed
-    # )
-    # dbt_seed()
-    # dbt_build_bronze()
-    # dbt_build_silver()
-    # dbt_build_gold()
-    # dbt_docs_generate()
+    from orchestration.tasks.dbt_tasks import (
+        dbt_build_gold,
+        dbt_build_silver,
+        dbt_build_bronze,
+        dbt_docs_generate,
+        dbt_seed,
+    )
+
+    dbt_seed()
+    dbt_build_bronze()
+    dbt_build_silver()
+    dbt_build_gold()
+    dbt_docs_generate()
 
 
 # ------------------------------------------------------------
