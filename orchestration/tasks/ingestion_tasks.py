@@ -137,3 +137,16 @@ def fetch_acs_metro_profiles() -> Path:
     client = ACSClient()
     data = client.fetch_metro_profiles(variables, fips_codes)
     return _write_seed_api("acs", "acs_metro_profiles.json", data)
+
+
+# --------------------------------------------
+# INFO: Databricks
+# --------------------------------------------
+
+
+@task(retries=1, tags=["ingestion", "databricks"])
+def upload_api_sources_to_databricks():
+    """Upload API Files to Databricks using sdk"""
+    from src.ingestion.databricks_uploader import upload_to_databricks
+
+    upload_to_databricks()

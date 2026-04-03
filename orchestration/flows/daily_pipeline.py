@@ -142,6 +142,13 @@ def transform() -> None:
     dbt_docs_generate()
 
 
+@flow(name="upload", log_prints=True)
+def upload() -> None:
+    from orchestration.tasks.ingestion_tasks import upload_api_sources_to_databricks
+
+    upload_api_sources_to_databricks()
+
+
 # ------------------------------------------------------------
 # INFO: Master flow
 # ------------------------------------------------------------
@@ -154,11 +161,12 @@ def daily_pipeline(
 
     Modes
     -----
-    full        : seeds + APIs + transform  (scheduled daily)
-    ingest      : seeds + APIs only         (debug / backfill)
-    seeds       : static downloads only     (first run / force refresh)
-    apis        : live API fetch only       (incremental refresh)
-    transform   : dbt only                  (re-transform existing data)
+    full        : seeds + APIs + transform      (scheduled daily)
+    ingest      : seeds + APIs only             (debug / backfill)
+    seeds       : static downloads only         (first run / force refresh)
+    apis        : live API fetch only           (incremental refresh)
+    transform   : dbt only                      (re-transform existing data)
+    upload      : upload files to databricks
     """
 
     config = get_config()
@@ -172,6 +180,8 @@ def daily_pipeline(
         ingest_apis(enabled_apis=enabled_apis)
     if mode in ("full", "ingest", "transform"):
         transform()
+    if mode in ("upload"):
+        upload()
 
     logger.info("====== daily_pipeline END =====")
 
@@ -185,7 +195,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Job Market Intelligence Pipeline")
     parser.add_argument(
         "--mode",
-        choices=["full", "ingest", "seeds", "apis", "transform"],
+        choices=["full", "ingest", "seeds", "apis", "transform", "upload"],
         default="full",
     )
     parser.add_argument(
