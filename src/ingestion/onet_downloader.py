@@ -16,6 +16,7 @@ import logging
 import zipfile
 from pathlib import Path
 
+import csv
 import requests
 
 from src.utils.config import AppConfig, get_config, ROOT
@@ -43,6 +44,22 @@ TARGET_FILES: dict[str, str] = {
 }
 
 DEFAULT_SEED_DIR = ROOT / "dbt" / "seeds" / "onet"
+
+
+def tsv_bytes_to_csv_bytes(tsv_bytes: bytes) -> bytes:
+    """
+    Convert tab-delimeted bytes -> comma-separated CSV bytes
+    """
+    input_stream = io.StringIO(tsv_bytes.decode("utf-8"))
+    output_stream = io.StringIO()
+
+    reader = csv.reader(input_stream, delimiter="\t")
+    writer = csv.writer(output_stream, delimiter=",")
+
+    for row in reader:
+        writer.writerow(row)
+
+    return output_stream.getvalue().encode("utf-8")
 
 
 def download_onet(
@@ -84,8 +101,14 @@ def download_onet(
         for archived_name in zf.namelist():
             basename = Path(archived_name).name
             if basename in TARGET_FILES:
-                dest = seed_dir / TARGET_FILES[basename]
-                dest.write_bytes(zf.read(archived_name))
+                raw_bytes = zf.read(archived_name)
+                csv_bytes = tsv_bytes_to_csv_bytes(raw_bytes)
+
+                # Change extension to .csv
+                dest_name = TARGET_FILES[basename].replace(".txt", ".csv")
+                dest = seed_dir / dest_name
+
+                dest.write_bytes(csv_bytes)
                 logger.debug("   extracted %s -> %s", basename, dest)
                 extracted += 1
 

@@ -30,6 +30,11 @@ clean-targets:         # directories to be removed by `dbt clean`
 # directory as views. These settings can be overridden in the individual model
 # files using the `{{ config(...) }}` macro.
 
+seeds:
+  dbt_datalakehouse:
+    onet:
+      +schema: landing
+      +quote_columns: false
 
 models:
   dbt_datalakehouse:
