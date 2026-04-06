@@ -33,7 +33,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 seeds:
   dbt_datalakehouse:
   +schema: landing
-  +quote_columns: false
 
 models:
   dbt_datalakehouse:

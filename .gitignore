@@ -4,6 +4,7 @@
 .env.secrets.yaml
 logs/*
 *.duckdb
+*.duckdb.wal
 
 # Ingestion files
 dbt/seeds/kaggle
