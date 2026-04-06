@@ -7,7 +7,7 @@ from src.utils.config import ROOT, get_config
 import os
 import logging
 
-DATAB_CATALOG = "workspace"
+DATAB_CATALOG = "analytics"
 LANDING_SCHEMA = "landing"
 VOLUME_NAME = "api_ingestion"
 logger = logging.getLogger(__name__)

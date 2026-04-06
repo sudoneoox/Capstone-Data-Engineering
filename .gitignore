@@ -3,10 +3,12 @@
 .env.secrets.yml
 .env.secrets.yaml
 logs/*
+*.duckdb
+*.duckdb.wal
 
 # Ingestion files
-dbt/seeds/kaggle/*
-dbt/seeds/onet/*
+dbt/seeds/kaggle
+dbt/seeds/onet
 data/api_raw/*
 
 

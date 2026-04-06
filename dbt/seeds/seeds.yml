@@ -1,0 +1,146 @@
+version: 2
+
+seeds:
+  #INFO: ONET SEEDS
+  - name: abilities
+    config:
+      alias: raw_onet_abilities
+      schema: landing
+
+  - name: alternate_titles
+    config:
+      alias: raw_onet_alternate_titles
+      schema: landing
+
+  - name: education_training_experience
+    config:
+      alias: raw_onet_education_training_experience
+      schema: landing
+
+  - name: emerging_tasks
+    config:
+      alias: raw_onet_emerging_tasks
+      schema: landing
+
+  - name: job_zones
+    config:
+      alias: raw_onet_job_zones
+      schema: landing
+      
+  - name: knowledge
+    config:
+      alias: raw_onet_knowledge
+      schema: landing
+
+  - name: occupation_data
+    config:
+      alias: raw_onet_occupation_data
+      schema: landing
+
+  - name: skills
+    config:
+      alias: raw_onet_skills
+      schema: landing
+
+  - name: task_statements
+    config:
+      alias: raw_onet_task_statements
+      schema: landing
+
+  - name: technology_skills
+    config:
+      alias: raw_onet_technology_skills
+      schema: landing
+
+  - name: work_activities
+    config:
+      alias: raw_onet_work_activities
+      schema: landing
+
+  #INFO: KAGGLE / LINKEDIN_JOBS
+  - name: linkedin_postings
+    config:
+      alias: raw_kaggle_linkedin_postings
+      schema: landing
+
+  - name: linkedin_companies
+    config:
+      alias: raw_kaggle_linkedin_companies
+      schema: landing
+
+  - name: linkedin_company_industries
+    config:
+      alias: raw_kaggle_linkedin_company_industries
+      schema: landing
+
+  - name: linkedin_company_specialities
+    config:
+      alias: raw_kaggle_linkedin_company_specialities
+      schema: landing
+
+  - name: linkedin_employee_counts
+    config:
+      alias: raw_kaggle_linkedin_employee_counts
+      schema: landing
+
+  - name: linkedin_benefits
+    config:
+      alias: raw_kaggle_linkedin_job_benefits
+      schema: landing
+
+  - name: linkedin_job_industries
+    config:
+      alias: raw_kaggle_linkedin_job_industries
+      schema: landing
+
+  - name: linkedin_job_skills
+    config:
+      alias: raw_kaggle_linkedin_job_skills
+      schema: landing
+      
+  - name: linkedin_salaries
+    config:
+      alias: raw_kaggle_linkedin_job_salaries
+      schema: landing
+
+  - name: linkedin_mapping_industries
+    config:
+      alias: raw_kaggle_linkedin_mapping_industries
+      schema: landing
+
+  - name: linkedin_mapping_skills
+    config:
+      alias: raw_kaggle_linkedin_mapping_skills
+      schema: landing
+
+  #INFO: KAGGLE / DATA_SCIENCE_JOBS
+  - name: ds_job_postings
+    config:
+      alias: raw_kaggle_ds_job_postings
+      schema: landing
+
+  - name: ds_job_skills
+    config:
+      alias: raw_kaggle_ds_job_skills
+      schema: landing
+
+  - name: ds_job_summary
+    config:
+      alias: raw_kaggle_ds_job_summary
+      schema: landing
+
+  #INFO: KAGGLE / LINKEDIN_JOBS_2024_LARGE
+  - name: linkedin_1_3m_job_skills
+    config:
+      alias: raw_kaggle_1_3m_job_skills
+      schema: landing
+
+  - name: linkedin_1_3m_job_summary
+    config:
+      alias: raw_kaggle_1_3m_job_summary
+      schema: landing
+
+  - name: linkedin_1_3m_job_postings
+    config:
+      alias: raw_kaggle_1_3m_linkedin_job_postings
+      schema: landing
