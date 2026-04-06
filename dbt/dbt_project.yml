@@ -2,11 +2,11 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'DWH'
+name: 'dbt_datalakehouse'
 version: '1.0.0'
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'DWH'
+profile: 'dbt_databricks'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -29,8 +29,18 @@ clean-targets:         # directories to be removed by `dbt clean`
 # In this example config, we tell dbt to build all models in the example/
 # directory as views. These settings can be overridden in the individual model
 # files using the `{{ config(...) }}` macro.
+
+
 models:
-  DWH:
+  dbt_datalakehouse:
+    +materialized: table
     # Config indicated by + and applies to all files under models/example/
-    example:
+    bronze:
+      +materialized: table
+      +schema: bronze
+    silver:
+      +materialized: table
+      +schema: silver
+    gold:
       +materialized: view
+      +schema: gold

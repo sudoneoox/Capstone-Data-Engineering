@@ -7,6 +7,10 @@ Run with Prefect CLI:
 Or via CLI entry point:
     scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode full
 
+To upload raw data to databricks:
+    scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode upload
+
+
 Examples:
     scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode apis --apis fred
 """
