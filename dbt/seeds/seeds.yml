@@ -6,11 +6,30 @@ seeds:
     config:
       alias: raw_onet_abilities
       schema: landing
+      column_types: 
+        "O*NET-SOC Code": varchar(14)
+        "Element ID": varchar(12)
+        "Element Name": varchar(30)
+        "Scale ID": varchar(4)
+        "Data Value": float
+        N: varchar(3)
+        "Standard Error": varchar(12)
+        "Lower CI Bound": varchar(12)
+        "Upper CI Bound": varchar(12)
+        "Recommend Suppress": varchar(1)
+        "Not Relevant": varchar(5)
+        "Date": varchar(10)
+        "Domain Source": varchar(30)
 
   - name: alternate_titles
     config:
       alias: raw_onet_alternate_titles
       schema: landing
+      column_types:
+        "O*NET-SOC Code": varchar(14)
+        "Alternate Title": varchar(64)
+        "Short Title": varchar(10)
+        "Source(s)": varchar(4)
 
   - name: education_training_experience
     config:
@@ -118,6 +137,22 @@ seeds:
     config:
       alias: raw_kaggle_ds_job_postings
       schema: landing
+      column_types:
+        job_link: text
+        last_processed_time: timestamp 
+        last_status: varchar(64)
+        got_summary: boolean
+        got_ner: boolean
+        is_being_worked: boolean
+        job_title: varchar(64)
+        company: varchar(64)
+        job_location: varchar(64)
+        first_seen: date
+        search_city: varchar(40)
+        search_country: varchar(40)
+        search_position: varchar(40)
+        job_level: varchar(32)
+        job_type: varchar(20)
 
   - name: ds_job_skills
     config:

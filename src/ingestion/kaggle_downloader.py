@@ -12,8 +12,10 @@ from __future__ import annotations
 import logging
 import subprocess
 from pathlib import Path
+import csv
 
 from src.utils.config import ROOT
+from src.utils.csv_sanitize import sanitize_dataset_csvs
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +120,7 @@ def download_kaggle_dataset(
 
     if rename_map:
         rename_dataset_files(dest_dir, rename_map)
+        sanitize_dataset_csvs(dest_dir)
 
     marker.touch()
     logger.info("Kaggle dataset %s downloaded successfully", slug)
