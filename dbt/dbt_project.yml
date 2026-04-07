@@ -51,3 +51,4 @@ models:
 # Project dependencies config
 vars:
   'dbt_date:time_zone': 'America/Chicago'
+  gcs_bucket: "{{ env_var('GCS_BUCKET_NAME', 'job-market-lakehouse') }}"
