@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 API_RAW_DIR = ROOT / "data" / "api_raw"
 SEED_DIR = ROOT / "dbt" / "seeds"
 PARQUET_DIR = ROOT / "data" / "parquet"
+FORCE_STRING_DTYPE: set[str] = {"linkedin_1_3m_job_summary.csv"}
 
 
 def _ensure_dir(path: Path) -> Path:
@@ -96,7 +97,13 @@ def convert_csv_to_parquet(csv_path: Path, dest_dir: Path) -> Path | None:
     dest = dest_dir / parquet_name
 
     try:
-        df = pd.read_csv(csv_path, low_memory=False)
+        read_kwargs: dict = {"low_memory": False}
+
+        if csv_path.name in FORCE_STRING_DTYPE:
+            read_kwargs["dtype"] = str
+            logger.info("Forcing string dtype for: %s", csv_path.name)
+
+        df = pd.read_csv(csv_path, **read_kwargs)
     except Exception:
         logger.exception("Failed to read CSV: %s", csv_path)
         return None

@@ -1,4 +1,39 @@
 version: 2
 
 models:
+  - name: stg_onet__abilities
+  - name: stg_onet__alternate_titles
+  - name: stg_onet__education_training_experience
+  - name: stg_onet__emerging_tasks
+  - name: stg_onet__job_zones
+  - name: stg_onet__knowledge
   - name: stg_onet__occupations
+  - name: stg_onet__skills
+  - name: stg_onet__task_statements
+  - name: stg_onet__technology_skills
+  - name: stg_onet_work_activities
+  - name: stg_acs__metro_profiles
+  - name: stg_bls__series
+  - name: stg_fred__series
+  - name: stg_adzuna__postings
+  - name: stg_kaggle_ds__job_skills
+  - name: stg_kaggle_ds__postings
+  - name: stg_kaggle_ds__summary
+  - name: stg_kaggle_linkedin_large__job_skills
+  - name: stg_kaggle_linkedin_large__job_summary
+  - name: stg_kaggle_linkedin_large__postings
+  - name: stg_kaggle_linkedin__mapping_skills
+  - name: stg_kaggle_linkedin__mapping_industries
+  - name: stg_kaggle_linkedin__job_benefits
+  - name: stg_kaggle_linkedin__job_industries
+  - name: stg_kaggle_linkedin__skills
+  - name: stg_kaggle_linkedin__salaries
+  - name: stg_kaggle_linkedin__companies
+  - name: stg_kaggle_linkedin__company_industries
+  - name: stg_kaggle_linkedin__company_specialties
+  - name: stg_kaggle_linkedin__employee_counts
+
+
+
+
+
