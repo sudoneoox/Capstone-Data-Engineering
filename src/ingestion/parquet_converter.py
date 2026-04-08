@@ -17,7 +17,6 @@ import json
 import logging
 from pathlib import Path
 
-from numpy import kaiser
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -27,7 +26,7 @@ from src.utils.config import ROOT
 logger = logging.getLogger(__name__)
 
 API_RAW_DIR = ROOT / "data" / "api_raw"
-SEED_DIR = ROOT / "dbt" / "seeds"
+SEED_DIR = ROOT / "data" / "seeds"
 PARQUET_DIR = ROOT / "data" / "parquet"
 SKIP_FILES: set[str] = {"linkedin_1_3m_job_summary.csv"}
 

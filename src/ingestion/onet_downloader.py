@@ -23,9 +23,10 @@ from src.utils.config import AppConfig, get_config, ROOT
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_SEED_DIR = ROOT / "data" / "seeds" / "onet"
+
 # NOTE: Bump this when O*NET publishes a new quarterly release
 ONET_VERSION = "30_2"
-
 
 # Only extract the files we actually use as seeds.
 # Full dataset has 40 files; no need to seed all of them.
@@ -42,8 +43,6 @@ TARGET_FILES: dict[str, str] = {
     "Work Activities.txt": "work_activities.txt",
     "Education, Training, and Experience.txt": "education_training_experience.txt",
 }
-
-DEFAULT_SEED_DIR = ROOT / "dbt" / "seeds" / "onet"
 
 
 def tsv_bytes_to_csv_bytes(tsv_bytes: bytes) -> bytes:
