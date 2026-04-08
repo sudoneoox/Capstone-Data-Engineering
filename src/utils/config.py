@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     databricks_host: str | None = Field(default=None, alias="DATABRICKS_HOST")
     databricks_token: SecretStr | None = Field(default=None, alias="DATABRICKS_TOKEN")
 
+    gcs_bucket_name: str | None = Field(default=None, alias="GCCS_BUCKET_NAME")
+    google_application_credentials: str | None = Field(
+        default=None, alias="GOOGLE_APPLICATION_CREDENTIALS"
+    )
+
 
 @dataclass(frozen=True)
 class AppConfig:

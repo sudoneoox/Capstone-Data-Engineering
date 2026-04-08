@@ -32,7 +32,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 seeds:
   dbt_datalakehouse:
-  +schema: landing
+    +schema: landing
 
 models:
   dbt_datalakehouse:
@@ -47,3 +47,8 @@ models:
     gold:
       +materialized: view
       +schema: gold
+
+# Project dependencies config
+vars:
+  'dbt_date:time_zone': 'America/Chicago'
+  gcs_bucket: "{{ env_var('GCS_BUCKET_NAME', 'job-market-lakehouse') }}"

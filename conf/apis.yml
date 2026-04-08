@@ -24,6 +24,25 @@ databricks:
     host_env: "DATABRICKS_HOST"
     token_env: "DATABRICKS_TOKEN"
 
+
+gcs:
+  bucket_env: "GCS_BUCKET_NAME"
+  bucket_default: "job-market-lakehouse"
+  prefix: "raw"
+  # Bucket layout:
+  #   gs://job-market-lakehouse/
+  #   ├── raw/              ← Parquet uploaded from local pipeline
+  #   │   ├── adzuna/
+  #   │   ├── bls/
+  #   │   ├── fred/
+  #   │   ├── acs/
+  #   │   ├── onet/
+  #   │   ├── kaggle/
+  #   │   └── ...
+  #   ├── bronze/           ← Databricks Delta tables
+  #   ├── silver/           ← cleaned/joined Delta
+  #   └── gold/             ← business marts Delta
+
 download_urls:
   onet: 
     base_url: https://www.onetcenter.org/dl_files/database
