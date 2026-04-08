@@ -7,12 +7,12 @@ Run with Prefect CLI:
 Or via CLI entry point:
     scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode full
 
-To upload raw data to databricks:
-    scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode upload
-
+To convert + upload to GCS:
+    scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode gcs-upload
 
 Examples:
     scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode apis --apis fred
+    scripts/with-secrets.sh python -m orchestration.flows.daily_pipeline --mode convert
 """
 
 from __future__ import annotations
@@ -124,7 +124,43 @@ def ingest_apis(enabled_apis: list[str] | None = None) -> None:
         fetch_acs_metro_profiles()
 
 
-# TODO:
+@flow(name="convert-parquet", log_prints=True)
+def convert_parquet(seeds: bool = True, apis: bool = True) -> None:
+    """
+    Convert raw files to Parquet format.
+    Reads from data/api_raw/ and dbt/seeds/, writes to data/parquet/.
+    """
+    from orchestration.tasks.storage_tasks import (
+        convert_all_to_parquet,
+        convert_api_to_parquet,
+        convert_seeds_to_parquet,
+    )
+
+    if seeds and apis:
+        convert_all_to_parquet()
+    elif apis:
+        convert_api_to_parquet()
+    elif seeds:
+        convert_seeds_to_parquet()
+
+
+@flow(name="upload-gcs", log_prints=True)
+def upload_gcs() -> None:
+    """Upload Parquet files from data/parquet/ to GCS raw/."""
+    from orchestration.tasks.storage_tasks import upload_parquet_to_gcs
+
+    _ = upload_parquet_to_gcs()
+
+
+@flow(name="upload-databricks", log_prints=True)
+def upload_databricks() -> None:
+    """Upload raw files to Databricks managed volumes."""
+    from orchestration.tasks.ingestion_tasks import upload_api_sources_to_databricks
+
+    upload_api_sources_to_databricks()
+
+
+# TODO: handle deps, need to test this once I finish writing dbt models
 @flow(name="transform", log_prints=True)
 def transform() -> None:
     """
@@ -146,13 +182,6 @@ def transform() -> None:
     dbt_docs_generate()
 
 
-@flow(name="upload", log_prints=True)
-def upload() -> None:
-    from orchestration.tasks.ingestion_tasks import upload_api_sources_to_databricks
-
-    upload_api_sources_to_databricks()
-
-
 # ------------------------------------------------------------
 # INFO: Master flow
 # ------------------------------------------------------------
@@ -169,8 +198,9 @@ def daily_pipeline(
     ingest      : seeds + APIs only             (debug / backfill)
     seeds       : static downloads only         (first run / force refresh)
     apis        : live API fetch only           (incremental refresh)
+    gcs-upload  : convert to Parquet + upload to GCS
+    upload      : upload raw files to Databricks volumes
     transform   : dbt only                      (re-transform existing data)
-    upload      : upload files to databricks
     """
 
     config = get_config()
@@ -180,13 +210,21 @@ def daily_pipeline(
 
     if mode in ("full", "seeds"):
         ingest_seeds(force=force_seeds)
+
     if mode in ("full", "ingest", "apis"):
         ingest_apis(enabled_apis=enabled_apis)
+
+    if mode in ("full", "convert", "gcs-upload"):
+        convert_parquet()
+
+    if mode in ("full", "gcs-upload"):
+        upload_gcs()
+
+    if mode in ("upload"):
+        upload_databricks()
+
     if mode in ("full", "ingest", "transform"):
         transform()
-    if mode in ("upload"):
-        upload()
-
     logger.info("====== daily_pipeline END =====")
 
 
@@ -199,7 +237,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Job Market Intelligence Pipeline")
     parser.add_argument(
         "--mode",
-        choices=["full", "ingest", "seeds", "apis", "transform", "upload"],
+        choices=[
+            "full",
+            "ingest",
+            "seeds",
+            "apis",
+            "convert",
+            "gcs-upload",
+            "upload",
+            "transform",
+        ],
         default="full",
     )
     parser.add_argument(
