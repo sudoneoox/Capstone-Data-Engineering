@@ -156,6 +156,95 @@ models:
         data_tests:
           - not_null
           - positive_value
+#INFO: Metro Dimension
+  - name: dim_metros
+    columns:
+      - name: cbsa_fips
+        data_tests:
+          - not_null
+          - unique
+      - name: metro_name
+        data_tests:
+          - not_null
+          - unique
+          - text_trimmed
+      - name: pct_civilian_labor_force
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_employed
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_unemployed
+        data_tests:
+          - not_null
+          - positive_value
+      - name: unemployment_rate
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_public_transportation_commute
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_work_from_home
+        data_tests:
+          - not_null
+          - positive_value
+      - name: mean_commute_minutes
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_mgmt_business_science_arts
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_information_industry
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_finance_real_estate_rental_leasing
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_professional_scientific_management_admin_waste
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_high_school_or_higher
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_bachelors_or_higher
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_broadband
+        data_tests:
+          - not_null
+          - positive_value
+      - name: median_household_income
+        data_tests:
+          - not_null
+          - positive_value
+      - name: median_earnings_male_ft_yr_round
+        data_tests:
+          - not_null
+          - positive_value
+      - name: median_earnings_female_ft_yr_round
+        data_tests:
+          - not_null
+          - positive_value
+      - name: poverty_rate_families
+        data_tests:
+          - not_null
+          - positive_value
+      - name: poverty_rate_all_people
+        data_tests:
+          - not_null
+          - positive_value
+
 
 
 
