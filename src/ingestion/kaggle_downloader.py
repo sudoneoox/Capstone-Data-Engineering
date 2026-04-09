@@ -12,14 +12,13 @@ from __future__ import annotations
 import logging
 import subprocess
 from pathlib import Path
-import csv
-
 from src.utils.config import ROOT
 from src.utils.csv_sanitize import sanitize_dataset_csvs
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SEED_DIR = ROOT / "dbt" / "seeds" / "kaggle"
+DEFAULT_SEED_DIR = ROOT / "data" / "seeds" / "kaggle"
+
 
 # slug -> local folder name
 KAGGLE_SOURCES: dict[str, str] = {

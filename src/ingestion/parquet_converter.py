@@ -26,9 +26,9 @@ from src.utils.config import ROOT
 logger = logging.getLogger(__name__)
 
 API_RAW_DIR = ROOT / "data" / "api_raw"
-SEED_DIR = ROOT / "dbt" / "seeds"
+SEED_DIR = ROOT / "data" / "seeds"
 PARQUET_DIR = ROOT / "data" / "parquet"
-FORCE_STRING_DTYPE: set[str] = {"linkedin_1_3m_job_summary.csv"}
+SKIP_FILES: set[str] = {"linkedin_1_3m_job_summary.csv"}
 
 
 def _ensure_dir(path: Path) -> Path:
@@ -92,17 +92,17 @@ def convert_json_to_parquet(json_path: Path, dest_dir: Path) -> Path | None:
 
 def convert_csv_to_parquet(csv_path: Path, dest_dir: Path) -> Path | None:
     """Convert a single CSV to Parquet with snappy compression"""
+
+    if csv_path.name in SKIP_FILES:
+        logger.info("Skipping CSV file: %s", csv_path)
+        return None
+
     dest_dir.mkdir(parents=True, exist_ok=True)
     parquet_name = csv_path.stem + ".parquet"
     dest = dest_dir / parquet_name
 
     try:
         read_kwargs: dict = {"low_memory": False}
-
-        if csv_path.name in FORCE_STRING_DTYPE:
-            read_kwargs["dtype"] = str
-            logger.info("Forcing string dtype for: %s", csv_path.name)
-
         df = pd.read_csv(csv_path, **read_kwargs)
     except Exception:
         logger.exception("Failed to read CSV: %s", csv_path)

@@ -20,8 +20,8 @@ models:
   - name: stg_kaggle_ds__postings
   - name: stg_kaggle_ds__summary
   - name: stg_kaggle_linkedin_large__job_skills
-  - name: stg_kaggle_linkedin_large__job_summary
   - name: stg_kaggle_linkedin_large__postings
+  - name: stg_kaggle_linkedin__postings
   - name: stg_kaggle_linkedin__mapping_skills
   - name: stg_kaggle_linkedin__mapping_industries
   - name: stg_kaggle_linkedin__job_benefits

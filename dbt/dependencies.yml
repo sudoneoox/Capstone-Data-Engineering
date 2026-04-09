@@ -1,9 +1,10 @@
 packages:
+  #INFO: https://github.com/dbt-labs/dbt-utils
   - package: dbt-labs/dbt_utils
     version: 1.3.3
-
+  #INFO: https://github.com/calogica/dbt-expectations
   - package: calogica/dbt_expectations
     version: [">=0.10.0", "<0.11.0"]
-
+  #INFO: https://github.com/dbt-labs/dbt-audit-helper
   - package: dbt-labs/audit_helper
     version: 0.13.0
