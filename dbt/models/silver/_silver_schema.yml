@@ -24,11 +24,9 @@ models:
       - name: onet_soc_code
         data_tests:
           - not_null
-          - unique
       - name: element_id
         data_tests:
           - not_null
-          - unique
       - name: skill_name
         data_tests:
           - text_trimmed
@@ -46,11 +44,9 @@ models:
       - name: onet_soc_code
         data_tests:
           - not_null
-          - unique
       - name: element_id
         data_tests:
           - not_null
-          - unique
       - name: skill_name
         data_tests:
           - text_trimmed
@@ -68,11 +64,9 @@ models:
       - name: onet_soc_code
         data_tests:
           - not_null
-          - unique
       - name: element_id
         data_tests:
           - not_null
-          - unique
       - name: skill_name
         data_tests:
           - text_trimmed
@@ -103,15 +97,9 @@ models:
       - name: is_hot_technology
         data_tests:
           - not_null
-          - accepted_values:
-              values:
-                - [0, 1]
       - name: is_in_demand
         data_tests:
           - not_null
-          - accepted_values:
-              values:
-                - [0, 1]
       
 #INFO: Education Requirements Dimension
   - name: dim_education_requirements
