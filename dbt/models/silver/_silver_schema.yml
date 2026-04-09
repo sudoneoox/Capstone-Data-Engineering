@@ -244,7 +244,20 @@ models:
         data_tests:
           - not_null
           - positive_value
-
+#INFO: Date Spin Dimension
+  - name: dim_date_spine
+    description: "Generate model. Row for every day from 2015-01-01 to current_date"
+    columns:
+      - name: date_key
+        description: "Integer date key in YYYYMMDD format."
+        data_tests:
+          - unique
+          - not_null
+      - name: full_date
+        description: "Calendar date."
+        data_tests:
+          - unique
+          - not_null
 
 
 
