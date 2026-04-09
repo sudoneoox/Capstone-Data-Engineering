@@ -1,0 +1,189 @@
+version: 2
+
+models:
+#INFO: Occupation Dimension
+  - name: dim_occupations
+    columns:
+      - name: onet_soc_code
+        data_tests:
+          - not_null
+          - unique
+      - name: occupation_title
+        data_tests:
+          - text_trimmed
+          - not_null
+      - name: occupation_description
+        data_tests:
+          - text_trimmed
+          - not_null
+      - name: job_zone
+
+# INFO: Skill Dimension
+  - name: dim_skills
+    columns:
+      - name: onet_soc_code
+        data_tests:
+          - not_null
+          - unique
+      - name: element_id
+        data_tests:
+          - not_null
+          - unique
+      - name: skill_name
+        data_tests:
+          - text_trimmed
+          - not_null
+      - name: level_value
+        data_tests:
+          - not_null
+      - name: importance_value
+        data_tests:
+          - not_null
+
+# INFO: Knowledge Dimension
+  - name: dim_knowledge
+    columns:
+      - name: onet_soc_code
+        data_tests:
+          - not_null
+          - unique
+      - name: element_id
+        data_tests:
+          - not_null
+          - unique
+      - name: skill_name
+        data_tests:
+          - text_trimmed
+          - not_null
+      - name: level_value
+        data_tests:
+          - not_null
+      - name: importance_value
+        data_tests:
+          - not_null
+
+# INFO: Work Activities Dimension
+  - name: dim_work_activities
+    columns:
+      - name: onet_soc_code
+        data_tests:
+          - not_null
+          - unique
+      - name: element_id
+        data_tests:
+          - not_null
+          - unique
+      - name: skill_name
+        data_tests:
+          - text_trimmed
+          - not_null
+      - name: level_value
+        data_tests:
+          - not_null
+      - name: importance_value
+        data_tests:
+          - not_null
+
+#INFO: Technology Skills Dimension
+  - name: dim_technology_skills
+    columns:
+      - name: onet_soc_code
+        data_tests:
+          - not_null
+      - name: technology_name
+        data_tests:
+          - not_null
+      - name: commodity_code
+        data_tests:
+          - not_null
+      - name: commodity_title
+        data_tests:
+          - not_null
+          - text_trimmed
+      - name: is_hot_technology
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - [0, 1]
+      - name: is_in_demand
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - [0, 1]
+      
+#INFO: Education Requirements Dimension
+  - name: dim_education_requirements
+    columns:
+      - name: onet_soc_code
+        data_tests:
+          - not_null
+          - unique
+      - name: pct_less_than_high_school
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_high_school_diploma
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_postsecondary_certificate
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_some_college
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_associates_degree
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_bachelors_degree
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_post_baccalaureate_certificate
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_masters_degree
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_post_masters_certificate
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_first_professional_degree
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_doctoral_degree
+        data_tests:
+          - not_null
+          - positive_value
+      - name: pct_post_doctoral_training
+        data_tests:
+          - not_null
+          - positive_value
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         
