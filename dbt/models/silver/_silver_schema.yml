@@ -274,7 +274,34 @@ models:
         data_tests:
           - not_null
     
-
+#INFO: Adzuna Intermediate Job Postings
+  - name: int_adzuna__postings_cleaned 
+    columns:
+      - name: company
+        data_tests:
+          - not_null
+      - name: category_label
+        data_tests:
+          - not_null
+      - name: created
+        data_tests:
+          - not_null
+      - name: salary_mid
+        data_tests:
+          - positive_value
+          - not_null
+      - name: state
+        data_tests:
+          - text_trimmed
+      - name: city
+        data_tests:
+          - text_trimmed
+      - name: county
+        data_tests:
+          - text_trimmed
+      - name: location
+        data_tests:
+          - text_trimmed
 
 
 
