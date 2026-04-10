@@ -9,3 +9,8 @@ seeds:
     config:
       schema: raw
 
+  - name: us_cities_states_counties
+    description: "80k+ entries filled in with US cities, states, and counties"
+    config: 
+      schema: raw
+      delimiter: "|"

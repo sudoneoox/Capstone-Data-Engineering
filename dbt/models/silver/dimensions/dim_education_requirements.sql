@@ -51,7 +51,8 @@ WITH education_renamed AS (
 		CASE category WHEN 12 THEN data_value END AS pct_post_doctoral_training
 	FROM joined_tables
 ), pivoted_collapsed AS (
--- Collapse the pivoted columns using SUM() + GROUP BY, we use group by just to be safe in case there are duplicate entries per onet_soc_code
+-- Collapse the pivoted columns using SUM() + GROUP BY
+-- We use SUM() just to be safe in case there are duplicate entries per onet_soc_code another option is MAX()
 -- We use COALESCE to remove NULL entries 
 	SELECT 
 		onet_soc_code,
