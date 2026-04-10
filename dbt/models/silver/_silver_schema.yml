@@ -258,6 +258,22 @@ models:
         data_tests:
           - unique
           - not_null
+#TODO: Finish Later
+#INFO: Intermediate Title To SOC Mapping (ONET)
+  - name: int_title_to_soc_mapping
+
+#INFO: Intermediate LinkedIn Postings Enriched
+  - name: int_kaggle_linkedin__postings_enriched
+    columns:
+      - name: annual_salary_estimate
+        data_tests:
+          - positive_value
+      - name: skills_array
+      - name: company_id
+      - name: location
+        data_tests:
+          - not_null
+    
 
 
 
