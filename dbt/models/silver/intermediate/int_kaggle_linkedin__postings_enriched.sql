@@ -188,7 +188,7 @@ skill_mapping_join AS (
 		sal.job_id,
 		sal.salary_id,
 		sal.annual_salary_estimate,
-		LIST(DISTINCT skill_name) FILTER (WHERE ski.skill_name IS NOT NULL) AS skills_array
+    {{ skills_array_agg('skill_name', distinct=true) }} AS skills_array
 	FROM final_linkedin_salaries AS sal
 	LEFT JOIN skill_mapping_join AS ski
 	USING (job_id) 
