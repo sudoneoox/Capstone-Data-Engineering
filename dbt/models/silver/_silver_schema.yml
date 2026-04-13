@@ -1,322 +1,442 @@
 version: 2
 
 models:
-#INFO: Occupation Dimension
+  # ============================================================
+  # DIMENSIONS
+  # ============================================================
+
   - name: dim_occupations
+    description: >
+      Master occupation dimension from O*NET. One row per O*NET-SOC code (~886 occupations).
+      Joins occupation titles/descriptions with job zones. This is the spine table that
+      all SOC-based joins reference.
     columns:
       - name: onet_soc_code
-        data_tests:
-          - not_null
-          - unique
+        description: "Full O*NET-SOC code (e.g. 15-1252.00). Primary key."
+        data_tests: [not_null, unique]
       - name: occupation_title
-        data_tests:
-          - text_trimmed
-          - not_null
+        description: "Canonical occupation title from O*NET."
+        data_tests: [text_trimmed, not_null]
       - name: occupation_description
-        data_tests:
-          - text_trimmed
-          - not_null
+        description: "Full-text occupation description from O*NET."
+        data_tests: [text_trimmed, not_null]
       - name: job_zone
+        description: "O*NET Job Zone (1-4). Higher = more education/experience required."
 
-# INFO: Skill Dimension
   - name: dim_skills
+    description: >
+      O*NET skill importance and level ratings per occupation.
+      Pivoted from raw IM/LV scale rows into one row per occupation × skill.
+      Excludes rows where O*NET recommends suppression.
     columns:
       - name: onet_soc_code
-        data_tests:
-          - not_null
+        description: "FK to dim_occupations."
+        data_tests: [not_null]
       - name: element_id
-        data_tests:
-          - not_null
+        description: "O*NET element code (e.g. 2.A.1.a)."
+        data_tests: [not_null]
       - name: skill_name
-        data_tests:
-          - text_trimmed
-          - not_null
-      - name: level_value
-        data_tests:
-          - not_null
+        description: "Human-readable skill name (e.g. Critical Thinking)."
+        data_tests: [text_trimmed, not_null]
       - name: importance_value
-        data_tests:
-          - not_null
+        description: "How important this skill is to the occupation (1-5 scale)."
+        data_tests: [not_null]
+      - name: level_value
+        description: "What level of this skill is needed (0-7 scale)."
+        data_tests: [not_null]
 
-# INFO: Knowledge Dimension
   - name: dim_knowledge
+    description: >
+      O*NET knowledge domain importance and level ratings per occupation.
+      Same pivot pattern as dim_skills. Domains include things like
+      mathematics, engineering, English language.
     columns:
       - name: onet_soc_code
-        data_tests:
-          - not_null
+        description: "FK to dim_occupations."
+        data_tests: [not_null]
       - name: element_id
-        data_tests:
-          - not_null
+        data_tests: [not_null]
       - name: skill_name
-        data_tests:
-          - text_trimmed
-          - not_null
-      - name: level_value
-        data_tests:
-          - not_null
+        description: "Knowledge domain name."
+        data_tests: [text_trimmed, not_null]
       - name: importance_value
-        data_tests:
-          - not_null
+        data_tests: [not_null]
+      - name: level_value
+        data_tests: [not_null]
 
-# INFO: Work Activities Dimension
   - name: dim_work_activities
+    description: >
+      O*NET generalized work activity importance and level ratings per occupation.
+      Examples: analyzing data, making decisions, interacting with computers.
     columns:
       - name: onet_soc_code
-        data_tests:
-          - not_null
+        data_tests: [not_null]
       - name: element_id
-        data_tests:
-          - not_null
+        data_tests: [not_null]
       - name: skill_name
-        data_tests:
-          - text_trimmed
-          - not_null
-      - name: level_value
-        data_tests:
-          - not_null
+        description: "Work activity name."
+        data_tests: [text_trimmed, not_null]
       - name: importance_value
-        data_tests:
-          - not_null
+        data_tests: [not_null]
+      - name: level_value
+        data_tests: [not_null]
 
-#INFO: Technology Skills Dimension
   - name: dim_technology_skills
+    description: >
+      O*NET technology/software tools per occupation. Maps occupations to
+      specific technologies (Python, Apache Spark, Tableau, etc.).
+      Includes hot technology and in-demand flags.
     columns:
       - name: onet_soc_code
-        data_tests:
-          - not_null
+        description: "FK to dim_occupations."
+        data_tests: [not_null]
       - name: technology_name
-        data_tests:
-          - not_null
+        description: "Specific technology or tool name (e.g. Python, SQL Server)."
+        data_tests: [not_null]
       - name: commodity_code
-        data_tests:
-          - not_null
+        description: "UNSPSC commodity code classifying the technology."
+        data_tests: [not_null]
       - name: commodity_title
-        data_tests:
-          - not_null
-          - text_trimmed
+        description: "UNSPSC commodity category name."
+        data_tests: [not_null, text_trimmed]
       - name: is_hot_technology
-        data_tests:
-          - not_null
+        description: "TRUE if O*NET flags this as a hot technology."
+        data_tests: [not_null]
       - name: is_in_demand
-        data_tests:
-          - not_null
-      
-#INFO: Education Requirements Dimension
+        description: "TRUE if O*NET flags this as in demand."
+        data_tests: [not_null]
+
   - name: dim_education_requirements
+    description: >
+      O*NET education level distribution per occupation. One row per SOC code with
+      percentage columns for each education level (less than high school through
+      post-doctoral). Percentages should sum to ~100 per occupation.
     columns:
       - name: onet_soc_code
-        data_tests:
-          - not_null
-          - unique
+        description: "FK to dim_occupations. Primary key."
+        data_tests: [not_null, unique]
       - name: pct_less_than_high_school
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_high_school_diploma
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_postsecondary_certificate
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_some_college
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_associates_degree
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_bachelors_degree
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_post_baccalaureate_certificate
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_masters_degree
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_post_masters_certificate
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_first_professional_degree
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_doctoral_degree
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_post_doctoral_training
-        data_tests:
-          - not_null
-          - positive_value
-#INFO: Metro Dimension
+        data_tests: [not_null]
+
   - name: dim_metros
+    description: >
+      ACS 5-Year demographic and economic profiles for 15 target tech metros.
+      One row per CBSA. Provides the geographic context layer for salary
+      normalization and talent pool analysis.
     columns:
       - name: cbsa_fips
-        data_tests:
-          - not_null
-          - unique
+        description: "CBSA FIPS code. Primary key."
+        data_tests: [not_null, unique]
       - name: metro_name
-        data_tests:
-          - not_null
-          - unique
-          - text_trimmed
+        description: "Full metro area name from Census."
+        data_tests: [not_null, unique, text_trimmed]
       - name: pct_civilian_labor_force
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_employed
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_unemployed
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: unemployment_rate
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_public_transportation_commute
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_work_from_home
-        data_tests:
-          - not_null
-          - positive_value
+        description: "% workers who worked from home. Key remote work indicator."
+        data_tests: [not_null]
       - name: mean_commute_minutes
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_mgmt_business_science_arts
-        data_tests:
-          - not_null
-          - positive_value
+        description: "% employed in management, business, science, and arts — proxy for STEM density."
+        data_tests: [not_null]
       - name: pct_information_industry
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_finance_real_estate_rental_leasing
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_professional_scientific_management_admin_waste
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_high_school_or_higher
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: pct_bachelors_or_higher
-        data_tests:
-          - not_null
-          - positive_value
+        description: "% population 25+ with bachelor's degree or higher. Talent pool depth."
+        data_tests: [not_null]
       - name: pct_broadband
-        data_tests:
-          - not_null
-          - positive_value
+        description: "% households with broadband internet."
+        data_tests: [not_null]
       - name: median_household_income
-        data_tests:
-          - not_null
-          - positive_value
+        description: "Median household income in dollars. Cost-of-living proxy."
+        data_tests: [not_null, positive_value]
       - name: median_earnings_male_ft_yr_round
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null, positive_value]
       - name: median_earnings_female_ft_yr_round
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null, positive_value]
       - name: poverty_rate_families
-        data_tests:
-          - not_null
-          - positive_value
+        data_tests: [not_null]
       - name: poverty_rate_all_people
-        data_tests:
-          - not_null
-          - positive_value
-#INFO: Date Spin Dimension
+        data_tests: [not_null]
+
+  - name: dim_companies
+    description: >
+      Company dimension from arshkon LinkedIn dataset. Aggregates company info,
+      industries, specialties, and latest employee/follower counts into one row
+      per company.
+    columns:
+      - name: company_id
+        description: "LinkedIn company ID. Primary key."
+        data_tests: [not_null, unique]
+      - name: company_name
+        description: "Lowercased, trimmed company name."
+        data_tests: [not_null]
+      - name: city
+        description: "Company HQ city (lowercased)."
+      - name: state
+        description: "Company HQ state (lowercased)."
+      - name: country
+        description: "Company HQ country (lowercased)."
+      - name: industries
+        description: "Comma-separated list of industries this company operates in."
+      - name: specialties
+        description: "Comma-separated list of company specialties."
+      - name: employee_count
+        description: "Most recent employee count from LinkedIn."
+      - name: follower_count
+        description: "Most recent LinkedIn follower count."
+
   - name: dim_date_spine
-    description: "Generate model. Row for every day from 2015-01-01 to current_date"
+    description: >
+      Generated date dimension. One row per day from 2015-01-01 to current_date.
+      Provides the time join key for all fact tables.
     columns:
       - name: date_key
         description: "Integer date key in YYYYMMDD format."
-        data_tests:
-          - unique
-          - not_null
+        data_tests: [unique, not_null]
       - name: full_date
         description: "Calendar date."
-        data_tests:
-          - unique
-          - not_null
-#TODO: Finish Later
-#INFO: Intermediate Title To SOC Mapping (ONET)
+        data_tests: [unique, not_null]
+      - name: year
+        data_tests: [not_null]
+      - name: month
+        data_tests: [not_null]
+      - name: quarter
+        data_tests: [not_null]
+      - name: day_of_week
+        data_tests: [not_null]
+      - name: is_weekend
+        data_tests: [not_null]
+      - name: month_name
+        data_tests: [not_null]
+
+  # ============================================================
+  # INTERMEDIATE
+  # ============================================================
+
   - name: int_title_to_soc_mapping
+    description: >
+      Lookup table mapping lowercased job titles to O*NET-SOC codes.
+      Built from ~70K O*NET alternate titles + ~886 canonical occupation titles.
+      Used by fct_job_postings for exact-match occupation classification.
+      Deduplicated so each title maps to exactly one SOC code.
+    columns:
+      - name: title_lower
+        description: "Lowercased, trimmed title text. Join key for posting titles."
+        data_tests: [not_null, unique]
+      - name: onet_soc_code
+        description: "Full O*NET-SOC code this title maps to."
+        data_tests: [not_null]
+      - name: soc_code
+        description: "Standard SOC code (first 7 chars of O*NET code)."
+        data_tests: [not_null]
+      - name: title_source
+        description: "'occupation_title' or 'alternate_title' — where the mapping came from."
+        data_tests: [not_null]
 
-#INFO: Intermediate LinkedIn Postings Enriched
   - name: int_kaggle_linkedin__postings_enriched
+    description: >
+      Arshkon LinkedIn postings enriched with annualized USD salary (corrected
+      pay period logic) and resolved skill names. All text columns lowercased
+      and trimmed. Epoch timestamps converted to proper timestamps.
     columns:
+      - name: posting_id
+        description: "LinkedIn job_id cast to VARCHAR."
+        data_tests: [not_null]
+      - name: job_title
+        description: "Lowercased, trimmed job title."
+        data_tests: [not_null]
       - name: annual_salary_estimate
+        description: "Annualized salary in USD. NULL if no salary data or non-USD."
+        data_tests: [positive_value]
+      - name: data_source
         data_tests:
-          - positive_value
-      - name: skills_array
-      - name: company_id
-      - name: location
-        data_tests:
-          - not_null
-    
-#INFO: Adzuna Intermediate Job Postings
-  - name: int_adzuna__postings_cleaned 
+          - accepted_values:
+              values: ['kaggle_linkedin']
+
+  - name: int_kaggle_large__postings_enriched
+    description: >
+      Asaniczka 1.3M LinkedIn postings enriched with raw skills string.
+      No salary data available in this dataset. All text lowercased and trimmed.
     columns:
+      - name: posting_id
+        description: "Original job_link URL used as posting identifier."
+        data_tests: [not_null]
+      - name: job_title
+        data_tests: [not_null]
+      - name: data_source
+        data_tests:
+          - accepted_values:
+              values: ['kaggle_linkedin_large']
+
+  - name: int_kaggle_ds__postings_enriched
+    description: >
+      Asaniczka data science postings enriched with skills + job summaries.
+      No salary data. Same schema pattern as large dataset (same author).
+    columns:
+      - name: posting_id
+        data_tests: [not_null]
+      - name: job_title
+        data_tests: [not_null]
+      - name: data_source
+        data_tests:
+          - accepted_values:
+              values: ['kaggle_ds']
+
+  - name: int_adzuna__postings_enriched
+    description: >
+      Adzuna live postings cleaned and geo-enriched. Location parsed into
+      city/county/state via US cities/states/counties reference seed.
+      Salary midpoint calculated from min/max. All text lowercased.
+    columns:
+      - name: posting_id
+        description: "Adzuna posting ID."
+        data_tests: [not_null]
+      - name: job_title
+        description: "Lowercased job title."
+        data_tests: [not_null]
       - name: company
-        data_tests:
-          - not_null
+        data_tests: [not_null]
       - name: category_label
-        data_tests:
-          - not_null
+        description: "Adzuna job category (e.g. 'IT Jobs')."
+        data_tests: [not_null]
       - name: created
-        data_tests:
-          - not_null
+        description: "Posting creation timestamp."
+        data_tests: [not_null]
       - name: salary_mid
-        data_tests:
-          - positive_value
-          - not_null
-      - name: state
-        data_tests:
-          - text_trimmed
-      - name: city
-        data_tests:
-          - text_trimmed
-      - name: county
-        data_tests:
-          - text_trimmed
+        description: "Midpoint of salary_min and salary_max. NULL if no salary data."
+        data_tests: [positive_value]
+
+  # ============================================================
+  # FACTS
+  # ============================================================
+
+  - name: fct_job_postings
+    description: >
+      Unified job postings fact table. Unions all 4 posting sources (arshkon LinkedIn,
+      asaniczka 1.3M, asaniczka DS, Adzuna) into a common schema. Left joins to
+      int_title_to_soc_mapping for occupation classification via exact title match.
+      This is the primary analytical table for job market analysis.
+    columns:
+      - name: posting_id
+        description: "Source-specific posting identifier. Unique within each data_source."
+        data_tests: [not_null]
+      - name: job_title
+        description: "Lowercased, trimmed job title."
+        data_tests: [not_null]
+      - name: company_name
+        description: "Lowercased company name. May be NULL for some sources."
       - name: location
+        description: "Raw location string from source."
+      - name: posted_at
+        description: "When the posting was created/listed."
+      - name: annual_salary_estimate
+        description: "Annualized salary estimate in USD. NULL for most Kaggle postings."
+        data_tests: [positive_value]
+      - name: onet_soc_code
+        description: "Matched O*NET-SOC code. NULL if title didn't match."
+      - name: soc_code
+        description: "Standard SOC code (first 7 chars). NULL if unmatched."
+      - name: soc_match_type
+        description: "'exact_match' or 'unmatched'."
+        data_tests: [not_null]
+      - name: data_source
+        description: "Which dataset this posting came from."
         data_tests:
-          - text_trimmed
+          - not_null
+          - accepted_values:
+              values: ['kaggle_linkedin', 'kaggle_linkedin_large', 'kaggle_ds', 'adzuna']
 
+  - name: fct_posting_skills
+    description: >
+      Long-format skills fact table. One row per posting × skill.
+      Skills from arshkon dataset are resolved from abbreviations to full names.
+      Skills from asaniczka datasets are exploded from comma-separated strings.
+      Adzuna postings have no structured skills and are not included.
+    columns:
+      - name: posting_id
+        description: "FK to fct_job_postings."
+        data_tests: [not_null]
+      - name: skill_name
+        description: "Lowercased, trimmed skill name."
+        data_tests: [not_null]
+      - name: data_source
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['kaggle_linkedin', 'kaggle_linkedin_large', 'kaggle_ds']
 
+  - name: fct_bls_observations
+    description: >
+      BLS time-series observations. One row per series × observation date.
+      Values cast to numeric, proper dates built from year+period codes.
+      Includes month-over-month and year-over-year net/percent changes.
+      Series IDs mapped to human-readable names.
+    columns:
+      - name: series_id
+        description: "BLS series identifier."
+        data_tests: [not_null]
+      - name: series_name
+        description: "Human-readable series name."
+        data_tests: [not_null]
+      - name: observation_date
+        description: "First of the month for monthly series. NULL for annual averages."
+      - name: value
+        description: "Observation value (rate, count, or index depending on series)."
+        data_tests: [not_null]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-         
+  - name: fct_fred_indicators
+    description: >
+      FRED economic indicators in long format. Unpivoted from the wide-format
+      API response (one column per series) into observation_date × series_id × value.
+      Covers unemployment, CPI, fed funds rate, payrolls, and other macro indicators.
+    columns:
+      - name: observation_date
+        description: "Observation date."
+        data_tests: [not_null]
+      - name: series_id
+        description: "FRED series identifier (e.g. UNRATE, CPIAUCSL)."
+        data_tests: [not_null]
+      - name: series_name
+        description: "Human-readable series name."
+        data_tests: [not_null]
+      - name: value
+        description: "Observation value."
+        data_tests: [not_null]

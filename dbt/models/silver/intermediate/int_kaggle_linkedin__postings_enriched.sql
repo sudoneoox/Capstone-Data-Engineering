@@ -1,3 +1,7 @@
+-- int_kaggle_linkedin__postings_enriched
+-- Enriches arshkon LinkedIn postings with annualized salary + resolved skill names
+-- Salary logic: corrects mislabeled pay_periods by magnitude, normalizes to annual USD
+-- Skills: resolves abbreviations via mapping table, aggregates into array per posting
 
 -- INFO: =============================== LINKEDIN SALARY FIX ==========================
 WITH salary_base AS (
@@ -19,7 +23,7 @@ WITH salary_base AS (
     FROM {{ ref("stg_kaggle_linkedin__salaries") }} s
     LEFT JOIN {{ ref("stg_kaggle_linkedin__postings") }} p
         ON s.job_id = p.job_id
-),fixed_pay_periods as (
+), fixed_pay_periods AS (
 
     SELECT
         salary_id,
@@ -34,13 +38,8 @@ WITH salary_base AS (
         observed_salary,
 
         CASE
-	        -- no observed salaries were NULL but we keep this just in CASE
+            -- no observed salaries were NULL but we keep this just in CASE
             WHEN observed_salary IS NULL THEN original_pay_period
-
-            /*
-              HARD RULES BY RAW MAGNITUDE
-              These are "what period does this raw number most plausibly represent?"
-            */
 
             -- Extremely large raw values are almost never hourly/weekly/monthly
             WHEN observed_salary >= 250000 THEN 'YEARLY'
@@ -48,9 +47,7 @@ WITH salary_base AS (
             -- 15k to < 250k could be YEARLY or MONTHLY depending on context
             WHEN observed_salary BETWEEN 15000 AND 250000 THEN 
                 CASE
-                    -- monthly values above ~15k happen, but if originally yearly keep yearly
                     WHEN original_pay_period = 'YEARLY' THEN 'YEARLY'
-                    -- If originally monthly AND salary is below 50000 THEN keep it as monthly
                     WHEN original_pay_period = 'MONTHLY' AND observed_salary <= 50000 THEN 'MONTHLY'
                     WHEN work_type IN ('FULL_TIME', 'CONTRACT', 'TEMPORARY') THEN 'YEARLY'
                     ELSE 'YEARLY'
@@ -61,7 +58,7 @@ WITH salary_base AS (
                 CASE
                     WHEN original_pay_period = 'MONTHLY' THEN 'MONTHLY'
                     WHEN original_pay_period = 'BIWEEKLY' THEN 'BIWEEKLY'
-                    WHEN  original_pay_period = 'WEEKLY' THEN 'WEEKLY'
+                    WHEN original_pay_period = 'WEEKLY' THEN 'WEEKLY'
                     WHEN work_type IN ('FULL_TIME', 'PART_TIME', 'CONTRACT', 'TEMPORARY') THEN 'MONTHLY'
                     ELSE 'MONTHLY'
                 END
@@ -88,7 +85,7 @@ WITH salary_base AS (
     FROM salary_base
 ),
 
-annualized as (
+annualized AS (
 -- Normalize salaries to annual pay after we have corrected their work_types
     SELECT
         salary_id,
@@ -131,77 +128,72 @@ annualized as (
 
     FROM fixed_pay_periods
 ), corrected_annualized_estimate AS (
-	-- Filter out for only full time jobs this still leaves us with a lot of rows
-	-- Estimate annual salary from the med, max, and min
-	-- Filter out outliers that are due to input error from source
-	-- Mark whether the pay_period was corrected
-	-- Filter out non USD currency job postings
-	SELECT
-	    salary_id,
-	    job_id,
-	    title,
-	    work_type,
-	    currency,
-	    original_pay_period,
-	    corrected_pay_period,
-	    min_salary,
-	    med_salary,
-	    max_salary,
-	    annualized_min_salary,
-	    annualized_med_salary,
-	    annualized_max_salary,
-	    COALESCE(
-	        annualized_med_salary,
-	        (annualized_min_salary + annualized_max_salary) / 2.0,
-	        annualized_min_salary,
-	        annualized_max_salary
-	    ) as annual_salary_estimate,
-	    CASE
-	        WHEN original_pay_period <> corrected_pay_period THEN true
-	        ELSE false
-	    END AS was_pay_period_corrected
-	FROM annualized
-	WHERE annual_salary_estimate < 1000000 AND annual_salary_estimate > 15000
-		AND UPPER(currency) = 'USD'
+    SELECT
+        salary_id,
+        job_id,
+        COALESCE(
+            annualized_med_salary,
+            (annualized_min_salary + annualized_max_salary) / 2.0,
+            annualized_min_salary,
+            annualized_max_salary
+        ) AS annual_salary_estimate
+    FROM annualized
+    WHERE COALESCE(
+            annualized_med_salary,
+            (annualized_min_salary + annualized_max_salary) / 2.0,
+            annualized_min_salary,
+            annualized_max_salary
+          ) BETWEEN 15000 AND 1000000
+      AND UPPER(currency) = 'USD'
 ), final_linkedin_salaries AS (
-	-- Finally grab only the columns we need for our intermediate table
-	-- We might change and optionally add the med, min, and max annual salaries for more insight if we need to
-	SELECT 
-		job_id,
-		salary_id,
-		CAST(ROUND(annual_salary_estimate) AS INTEGER) AS annual_salary_estimate -- round a couple cents don't really matter 
-	FROM corrected_annualized_estimate
+    SELECT 
+        job_id,
+        CAST(ROUND(annual_salary_estimate) AS INTEGER) AS annual_salary_estimate
+    FROM corrected_annualized_estimate
 ), 
---INFO: =============================== JOB SKILLS ====================================
+-- INFO: =============================== JOB SKILLS ====================================
 skill_mapping_join AS (
 -- Resolve skill_abr by joining table with mapping_skills to get full skill names
-	SELECT 
-		ljs.job_id AS job_id,
-		TRIM(LOWER(lms.skill_name)) AS skill_name
-	FROM {{ ref("stg_kaggle_linkedin__job_skills") }} AS ljs
-	LEFT JOIN {{ ref("stg_kaggle_linkedin__mapping_skills") }} AS lms
-	USING(skill_abr)
-), skills_salaries AS (
-	-- The salaries table has far less rows than the skills table so we use left join here
-	-- Also put skills into an array for similar job_ids
-	SELECT 
-		sal.job_id,
-		sal.salary_id,
-		sal.annual_salary_estimate,
-    {{ skills_array_agg('skill_name', distinct=true) }} AS skills_array
-	FROM final_linkedin_salaries AS sal
-	LEFT JOIN skill_mapping_join AS ski
-	USING (job_id) 
-	GROUP BY 1,2,3
+    SELECT 
+        ljs.job_id,
+        TRIM(LOWER(lms.skill_name)) AS skill_name
+    FROM {{ ref("stg_kaggle_linkedin__job_skills") }} AS ljs
+    LEFT JOIN {{ ref("stg_kaggle_linkedin__mapping_skills") }} AS lms
+    USING(skill_abr)
+    WHERE lms.skill_name IS NOT NULL
+), skills_per_job AS (
+    SELECT
+        job_id,
+        {{ skills_array_agg('skill_name', distinct=true) }} AS skills_array
+    FROM skill_mapping_join
+    GROUP BY 1
 )
 
--- We might change the order of the join later to exclude rows with missing salaries later on
+-- INFO: =============================== FINAL JOIN ====================================
+-- Join postings with salary and skills, normalize all text columns
 SELECT
-	s.annual_salary_estimate,
-	s.skills_array,
-	p.company_id,
-	p.location
+    CAST(p.job_id AS VARCHAR)                       AS posting_id,
+    LOWER(TRIM(p.title))                            AS job_title,
+    TRIM(p.description)                             AS description,
+    LOWER(TRIM(p.location))                         AS location,
+    LOWER(TRIM(p.company_name))                     AS company_name,
+    CAST(p.company_id AS BIGINT)                    AS company_id,
+    LOWER(TRIM(p.formatted_work_type))              AS work_type,
+    LOWER(TRIM(p.formatted_experience_level))       AS experience_level,
+    -- listed_time is epoch milliseconds, convert to timestamp
+    CASE
+        WHEN p.listed_time IS NOT NULL AND p.listed_time > 0
+        THEN CAST(EPOCH_MS(CAST(p.listed_time AS BIGINT)) AS TIMESTAMP)
+        ELSE NULL
+    END                                             AS posted_at,
+    CAST(p.remote_allowed AS BOOLEAN)               AS is_remote,
+    CAST(p.views AS INTEGER)                        AS view_count,
+    CAST(p.applies AS INTEGER)                      AS apply_count,
+    sal.annual_salary_estimate,
+    ski.skills_array,
+    'kaggle_linkedin'                               AS data_source
 FROM {{ ref("stg_kaggle_linkedin__postings") }} AS p
-LEFT JOIN skills_salaries AS s
-USING(job_id)
-
+LEFT JOIN final_linkedin_salaries AS sal
+    USING(job_id)
+LEFT JOIN skills_per_job AS ski
+    USING(job_id)
