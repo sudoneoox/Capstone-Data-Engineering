@@ -2,11 +2,11 @@ version: 2
 
 models:
   # ============================================================
-  # DIMENSIONS
+  #INFO: DIMENSIONS
   # ============================================================
 
   - name: dim_occupations
-    description: >
+    description: 
       Master occupation dimension from O*NET. One row per O*NET-SOC code (~886 occupations).
       Joins occupation titles/descriptions with job zones. This is the spine table that
       all SOC-based joins reference.
@@ -24,7 +24,7 @@ models:
         description: "O*NET Job Zone (1-4). Higher = more education/experience required."
 
   - name: dim_skills
-    description: >
+    description: 
       O*NET skill importance and level ratings per occupation.
       Pivoted from raw IM/LV scale rows into one row per occupation × skill.
       Excludes rows where O*NET recommends suppression.
@@ -46,7 +46,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_knowledge
-    description: >
+    description: 
       O*NET knowledge domain importance and level ratings per occupation.
       Same pivot pattern as dim_skills. Domains include things like
       mathematics, engineering, English language.
@@ -65,9 +65,9 @@ models:
         data_tests: [not_null]
 
   - name: dim_work_activities
-    description: >
-      O*NET generalized work activity importance and level ratings per occupation.
-      Examples: analyzing data, making decisions, interacting with computers.
+    description: 
+      "O*NET generalized work activity importance and level ratings per occupation.
+      Examples: analyzing data, making decisions, interacting with computers."
     columns:
       - name: onet_soc_code
         data_tests: [not_null]
@@ -82,7 +82,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_technology_skills
-    description: >
+    description: 
       O*NET technology/software tools per occupation. Maps occupations to
       specific technologies (Python, Apache Spark, Tableau, etc.).
       Includes hot technology and in-demand flags.
@@ -107,7 +107,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_education_requirements
-    description: >
+    description: 
       O*NET education level distribution per occupation. One row per SOC code with
       percentage columns for each education level (less than high school through
       post-doctoral). Percentages should sum to ~100 per occupation.
@@ -141,7 +141,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_metros
-    description: >
+    description: 
       ACS 5-Year demographic and economic profiles for 15 target tech metros.
       One row per CBSA. Provides the geographic context layer for salary
       normalization and talent pool analysis.
@@ -197,7 +197,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_companies
-    description: >
+    description: 
       Company dimension from arshkon LinkedIn dataset. Aggregates company info,
       industries, specialties, and latest employee/follower counts into one row
       per company.
@@ -224,7 +224,7 @@ models:
         description: "Most recent LinkedIn follower count."
 
   - name: dim_date_spine
-    description: >
+    description: 
       Generated date dimension. One row per day from 2015-01-01 to current_date.
       Provides the time join key for all fact tables.
     columns:
@@ -248,11 +248,11 @@ models:
         data_tests: [not_null]
 
   # ============================================================
-  # INTERMEDIATE
+  #INFO: INTERMEDIATE
   # ============================================================
 
   - name: int_title_to_soc_mapping
-    description: >
+    description: 
       Lookup table mapping lowercased job titles to O*NET-SOC codes.
       Built from ~70K O*NET alternate titles + ~886 canonical occupation titles.
       Used by fct_job_postings for exact-match occupation classification.
@@ -272,7 +272,7 @@ models:
         data_tests: [not_null]
 
   - name: int_kaggle_linkedin__postings_enriched
-    description: >
+    description: 
       Arshkon LinkedIn postings enriched with annualized USD salary (corrected
       pay period logic) and resolved skill names. All text columns lowercased
       and trimmed. Epoch timestamps converted to proper timestamps.
@@ -292,7 +292,7 @@ models:
               values: ['kaggle_linkedin']
 
   - name: int_kaggle_large__postings_enriched
-    description: >
+    description: 
       Asaniczka 1.3M LinkedIn postings enriched with raw skills string.
       No salary data available in this dataset. All text lowercased and trimmed.
     columns:
@@ -307,7 +307,7 @@ models:
               values: ['kaggle_linkedin_large']
 
   - name: int_kaggle_ds__postings_enriched
-    description: >
+    description: 
       Asaniczka data science postings enriched with skills + job summaries.
       No salary data. Same schema pattern as large dataset (same author).
     columns:
@@ -321,7 +321,7 @@ models:
               values: ['kaggle_ds']
 
   - name: int_adzuna__postings_enriched
-    description: >
+    description: 
       Adzuna live postings cleaned and geo-enriched. Location parsed into
       city/county/state via US cities/states/counties reference seed.
       Salary midpoint calculated from min/max. All text lowercased.
@@ -345,11 +345,11 @@ models:
         data_tests: [positive_value]
 
   # ============================================================
-  # FACTS
+  #INFO: FACTS
   # ============================================================
 
   - name: fct_job_postings
-    description: >
+    description: 
       Unified job postings fact table. Unions all 4 posting sources (arshkon LinkedIn,
       asaniczka 1.3M, asaniczka DS, Adzuna) into a common schema. Left joins to
       int_title_to_soc_mapping for occupation classification via exact title match.
@@ -404,7 +404,7 @@ models:
               values: ['kaggle_linkedin', 'kaggle_linkedin_large', 'kaggle_ds']
 
   - name: fct_bls_observations
-    description: >
+    description: 
       BLS time-series observations. One row per series × observation date.
       Values cast to numeric, proper dates built from year+period codes.
       Includes month-over-month and year-over-year net/percent changes.
@@ -423,7 +423,7 @@ models:
         data_tests: [not_null]
 
   - name: fct_fred_indicators
-    description: >
+    description: 
       FRED economic indicators in long format. Unpivoted from the wide-format
       API response (one column per series) into observation_date × series_id × value.
       Covers unemployment, CPI, fed funds rate, payrolls, and other macro indicators.
