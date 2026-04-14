@@ -1,6 +1,14 @@
 WITH base AS (
 
     SELECT
+        id,
+        title,
+        description,
+        contract_time,
+        salary_min,
+        salary_max,
+        latitude,
+        longitude,
         "location.display_name" AS raw_location,
         "company.display_name" AS company,
         "category.label" AS category_label,
@@ -62,6 +70,14 @@ matched AS (
 final AS (
 
     SELECT
+        id,
+        title,
+        description,
+        contract_time,
+        salary_min,
+        salary_max,
+        latitude,
+        longitude,
         raw_location AS location,
         company,
         category_label,
@@ -115,13 +131,20 @@ final AS (
 )
 
 SELECT 
--- Might drop location, and county later on
+  CAST(id AS VARCHAR) AS posting_id,
+  title AS job_title,
+  description,
+  contract_time AS work_type,
 	company,
 	category_label,
-	created,
+  CAST(ROUND(salary_max) AS INTEGER) AS salary_max,
 	CAST(ROUND(salary_mid) AS INTEGER) AS salary_mid,
+  CAST(ROUND(salary_min) AS INTEGER) AS salary_min,
+  LOWER(county) AS county,
+  LOWER(city) AS city,
 	LOWER(state) AS state,
-	LOWER(city) AS city,
-	LOWER(county) AS county,
 	location,
+  latitude,
+  longitude,
+  created,
 FROM final

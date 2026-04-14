@@ -11,7 +11,7 @@ models:
   - name: stg_onet__skills
   - name: stg_onet__task_statements
   - name: stg_onet__technology_skills
-  - name: stg_onet_work_activities
+  - name: stg_onet__work_activities
   - name: stg_acs__metro_profiles
   - name: stg_bls__series
   - name: stg_fred__series

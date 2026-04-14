@@ -1,40 +1,19 @@
-WITH renamed_pivoted AS (
-	SELECT 
-		"O*NET-SOC Code" AS onet_soc_code,
-		"Element ID" AS element_id,
-		"Element Name" AS skill_name,
-		CASE "Scale ID" 
-			WHEN 'IM' THEN "Data Value"
-		END AS importance_value,
-		CASE "Scale ID"
-			WHEN 'LV' THEN "Data Value"
-		END AS level_value,
-	FROM {{ ref("stg_onet__knowledge") }}
-	WHERE "Recommend Suppress" != 'Y' -- Do not include suppressed rows
-), cleaned AS (
-	SELECT 
-		onet_soc_code,
-		TRIM(element_id) AS element_id,
-		TRIM(skill_name) AS skill_name,
-		importance_value,
-		level_value
-	FROM renamed_pivoted
-), remove_dup_columns AS (
-	SELECT 
-		*,
-		LEAD(level_value) OVER(PARTITION BY onet_soc_code, element_id) AS level_value_new
-	FROM cleaned
-), source AS (
-	SELECT
-		onet_soc_code, 
-		element_id,
-		skill_name,
-		importance_value,
-		level_value_new AS level_value
-	FROM remove_dup_columns
-	WHERE level_value_new IS NOT NULL
+-- dim_knowledge: O*NET knowledge domain importance + level per occupation
+-- Same pivot pattern as dim_skills
+
+WITH pivoted AS (
+    SELECT
+        "O*NET-SOC Code"    AS onet_soc_code,
+        TRIM("Element ID")  AS element_id,
+        TRIM("Element Name") AS skill_name,
+        MAX(CASE "Scale ID" WHEN 'IM' THEN "Data Value" END) AS importance_value,
+        MAX(CASE "Scale ID" WHEN 'LV' THEN "Data Value" END) AS level_value
+    FROM {{ ref("stg_onet__knowledge") }}
+    WHERE "Recommend Suppress" != 'Y'
+    GROUP BY 1, 2, 3
 )
 
-SELECT 
-	*
-FROM source
+SELECT *
+FROM pivoted
+WHERE importance_value IS NOT NULL
+  AND level_value IS NOT NULL
