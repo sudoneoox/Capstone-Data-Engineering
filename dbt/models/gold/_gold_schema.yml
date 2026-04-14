@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  # ============================================================
+    #INFO: MARKET PULSE — macro job market health
+  # ============================================================
+ 
+  - name: gold_market_overview
+    description: 
+      "Monthly aggregated job market health metrics. One row per month x data_source. 
+      Feeds the 'Market Pulse' dashboard page. Tracks posting volume, salary trends, remote work prevalance, 
+      and hiring company diversity over time."
+
+  - name: gold_economic_dashboard
+    description: 
+      "Combined BLS + FRED economic indicators in a single monthly time series.
+      One row per month x indicator. Feeds the trendlines on 'Market Pulse'.
+      Pre-computes year-over-year changes and groups indicators into categories for dashboard filtering"
+
+  # ============================================================
+    #INFO: ROLE DEEP-DIVE — per-occupation analytics
+  # ============================================================
+ 
+
+  - name: gold_role_analysis
+    description: 
+      "Per-occupation analytics. One row per matched O*NET-SOC code. Feeds the 'Role Deep-Dive' dashboard page.
+      Combines posting volume, salary statistics, education requirements, and job zone in a single role profile."
+
+  - name: gold_role_top_skills
+    description: 
+      "Top Skills per occupation, ranked by mention frequency in job postings. Companion to gold_role_analysis.
+      One row occupation x skill x rank. Includes both market demand (from postings) and O*NET formal rating (from dim_skills) 
+      for gap analysis"
+
+
+  # ============================================================
+    #INFO: METRO COMPARE — geographic job market comparison
+  # ============================================================
+ 
+  - name: gold_metro_comparison
+    description: 
+      "Geographic job market comparison. One row per state (from Adzuna ge-matching). Joins posting volume and salary data
+      with ACS demographic context from dim_metros. Computes salary to income ratio for purchasing power comparison."
+
+
+
+  # ============================================================
+    #INFO:  SKILLS TRACKER — skills demand over time
+  # ============================================================
+  - name: gold_skills_demand
+    description: 
+      "Skills mentioned in job postings tracked over time. One row per skill x month. Feeds the 'Skills Tracker' dashboard page.
+      Computes month over month change and flags trending skills."
+
+
+
+  # ============================================================
+    #INFO: SKILLS GAP ANALYSIS — O*NET formal vs market demand
+  # ============================================================
+  - name: gold_occupation_skills_profile
+    description: 
+      "Bridges O*NET formal skill requirements with actual employer demand from postings. One row per occupation x skill. 
+      Shows both waht government says the job needs and what employers actually ask for, with a gap indicator"
+
