@@ -10,7 +10,7 @@ import logging
 import json
 from pathlib import Path
 from tracemalloc import start
-
+from datetime import datetime
 
 from src.utils.config import ROOT, get_config
 from prefect import task
@@ -81,7 +81,7 @@ def fetch_bls_series(
 def fetch_adzuna_jobs(
     what: str,
     where: str = "",
-    max_pages: int = 10,
+    max_pages: int = 25,
 ) -> Path:
     """Paginate Adzuna search and load results in API_DATA_DIR"""
     from src.ingestion.adzuna_client import AdzunaClient
@@ -89,9 +89,15 @@ def fetch_adzuna_jobs(
     client = AdzunaClient()
     jobs = client.search_jobs_all_pages(what, where, max_pages=max_pages)
 
+    for job in jobs:
+        job["_search_query"] = what
+        job["_search_location"] = where or "all"
+        job["_fetched_at"] = datetime.now().isoformat()
+
     safe_name = what.replace(" ", "_").lower()
     safe_loc = where.replace(" ", "_").replace(",", "").lower() or "all"
-    filename = f"adzuna_{safe_name}_{safe_loc}.json"
+    ts = datetime.now().strftime("%Y%m%d")
+    filename = f"adzuna_{safe_name}_{safe_loc}_{ts}.json"
 
     return _write_seed_api("adzuna", filename, jobs)
 
