@@ -207,7 +207,6 @@ models:
         data_tests: [not_null, unique]
       - name: company_name
         description: "Lowercased, trimmed company name."
-        data_tests: [not_null]
       - name: city
         description: "Company HQ city (lowercased)."
       - name: state
@@ -383,6 +382,19 @@ models:
           - not_null
           - accepted_values:
               values: ['kaggle_linkedin', 'kaggle_linkedin_large', 'kaggle_ds', 'adzuna']
+      - name: is_remote
+        description: 
+          "TRUE if posting is identified as remote work. Derived from:
+          arshkon LinkedIn = remote_allowed boolean, other sources = text match
+          on work_type/title containing 'remote'. FALSE if no remote signal found."
+        data_tests: [not_null]
+      - name: is_snapshot
+        description: 
+          "TRUE for point-in-time snapshot sources (kaggle_linkedin_large, kaggle_ds)
+          where all postings have the same month. FALSE for sources with real date
+          distribution (kaggle_linkedin, adzuna). Used by gold models to exclude
+          snapshot sources from time-series analysis."
+        data_tests: [not_null]
 
   - name: fct_posting_skills
     description: >

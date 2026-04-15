@@ -2,64 +2,235 @@ version: 2
 
 models:
   # ============================================================
-    #INFO: MARKET PULSE — macro job market health
+  # MARKET PULSE
   # ============================================================
- 
-  - name: gold_market_overview
-    description: 
-      "Monthly aggregated job market health metrics. One row per month x data_source. 
-      Feeds the 'Market Pulse' dashboard page. Tracks posting volume, salary trends, remote work prevalance, 
-      and hiring company diversity over time."
+
+  - name: gold_market_snapshot
+    description:
+      Cross-sectional job market summary per data source. One row per data_source.
+      Answers "what does each source tell us about the market overall?"
+      NOT a time-series — use gold_market_trends for that.
+      Includes all sources (snapshots and live collection).
+    columns:
+      - name: data_source
+        description: "Source dataset identifier."
+        data_tests:
+          - not_null
+          - unique
+          - accepted_values:
+              values: ['kaggle_linkedin', 'kaggle_linkedin_large', 'kaggle_ds', 'adzuna']
+      - name: is_snapshot
+        description: "TRUE for point-in-time datasets (large, ds), FALSE for ongoing collection (linkedin, adzuna)."
+        data_tests: [not_null]
+      - name: total_postings
+        description: "Total postings from this source."
+        data_tests: [not_null, positive_value]
+      - name: unique_companies
+        description: "Distinct company names."
+      - name: earliest_posting
+        description: "Earliest posted_at timestamp in this source."
+      - name: latest_posting
+        description: "Most recent posted_at timestamp."
+      - name: distinct_months
+        description: "Number of distinct calendar months with postings."
+      - name: median_salary
+        description: "Median annual salary (USD). NULL if < 5 salary data points."
+      - name: pct_remote
+        description: "Fraction of postings flagged remote via is_remote boolean."
+      - name: soc_match_rate
+        description: "Fraction of postings that matched an O*NET-SOC code."
+
+  - name: gold_market_trends
+    description:
+      "Monthly time-series job market metrics. One row per month × data_source.
+      ONLY includes non-snapshot sources (is_snapshot = FALSE):
+      kaggle_linkedin (April 2024 window) and adzuna (ongoing live collection).
+      
+      kaggle_large and kaggle_ds are excluded because all their postings fall in
+      a single month, making MoM trend analysis meaningless.
+      
+      The Adzuna time-series grows with each daily pipeline run.
+      After 30+ days of collection, this becomes the primary trend view."
+    columns:
+      - name: report_month
+        description: "First of month."
+        data_tests: [not_null]
+      - name: data_source
+        description: "Non-snapshot source: kaggle_linkedin or adzuna."
+        data_tests: [not_null]
+      - name: total_postings
+        description: "Postings this month from this source."
+        data_tests: [not_null, positive_value]
+      - name: unique_companies
+        description: "Distinct companies posting this month."
+      - name: median_salary
+        description: "Median annual salary. NULL if < 5 data points."
+      - name: pct_remote
+        description: "Fraction of postings flagged remote."
+      - name: soc_match_rate
+        description: "Fraction with matched SOC code."
+      - name: postings_mom_change
+        description: "Change in total_postings from previous month."
+      - name: postings_mom_change_pct
+        description: "Percentage change from previous month."
 
   - name: gold_economic_dashboard
-    description: 
-      "Combined BLS + FRED economic indicators in a single monthly time series.
-      One row per month x indicator. Feeds the trendlines on 'Market Pulse'.
-      Pre-computes year-over-year changes and groups indicators into categories for dashboard filtering"
+    description:
+       "Combined BLS + FRED economic indicators. One row per month x indicator.
+       Feeds trend lines on 'Market Pulse.' Pre-computes YoY changes.
+       Deduplicates overlapping series (BLS preferred over FRED).
+       Categorizes indicators: employment, labor_demand, inflation, productivity."
+    columns:
+      - name: report_month
+        data_tests: [not_null]
+      - name: series_id
+        data_tests: [not_null]
+      - name: series_name
+        data_tests: [not_null]
+      - name: source_system
+        description: "'bls' or 'fred'."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['bls', 'fred']
+      - name: category
+        description: "Indicator group: employment, labor_demand, inflation, productivity, consumer, unemployment_duration."
+        data_tests: [not_null]
+      - name: value
+        data_tests: [not_null]
+      - name: yoy_change
+        description: "value minus value_12m_ago."
+      - name: yoy_change_pct
+        description: "Year-over-year percentage change."
 
   # ============================================================
-    #INFO: ROLE DEEP-DIVE — per-occupation analytics
+  # ROLE DEEP-DIVE
   # ============================================================
- 
 
   - name: gold_role_analysis
-    description: 
-      "Per-occupation analytics. One row per matched O*NET-SOC code. Feeds the 'Role Deep-Dive' dashboard page.
-      Combines posting volume, salary statistics, education requirements, and job zone in a single role profile."
+    description:
+      Per-occupation analytics. One row per matched O*NET-SOC code (min 10 postings).
+      Combines posting volume, salary percentiles, education requirements,
+      work characteristics, and top hiring companies.
+    columns:
+      - name: onet_soc_code
+        description: "Primary key."
+        data_tests: [not_null, unique]
+      - name: occupation_title
+        data_tests: [not_null]
+      - name: job_zone
+      - name: total_postings
+        data_tests: [not_null, positive_value]
+      - name: postings_last_30d
+      - name: postings_last_90d
+      - name: median_salary
+        description: "Median annual salary (USD). NULL if < 5 salary data points."
+      - name: pct_remote
+        description: "Fraction flagged remote via is_remote boolean."
+      - name: most_common_experience_level
+      - name: most_common_work_type
+      - name: top_hiring_companies
+        description: "Top 5 companies by posting count (comma-separated)."
+      - name: pct_bachelors_degree
+        description: "O*NET: % of workers with bachelor's degree."
+      - name: pct_masters_degree
 
   - name: gold_role_top_skills
-    description: 
-      "Top Skills per occupation, ranked by mention frequency in job postings. Companion to gold_role_analysis.
-      One row occupation x skill x rank. Includes both market demand (from postings) and O*NET formal rating (from dim_skills) 
-      for gap analysis"
-
+    description:
+      Top 20 skills per occupation ranked by mention frequency in postings.
+      Companion to gold_role_analysis. Includes O*NET formal importance rating
+      alongside market demand for gap identification.
+    columns:
+      - name: onet_soc_code
+        data_tests: [not_null]
+      - name: occupation_title
+        data_tests: [not_null]
+      - name: skill_name
+        data_tests: [not_null]
+      - name: skill_rank
+        description: "1 = most mentioned."
+        data_tests: [not_null, positive_value]
+      - name: mention_count
+        data_tests: [not_null, positive_value]
+      - name: pct_of_postings
+      - name: onet_importance_value
+        description: "O*NET formal importance (1-5). NULL if no match."
+      - name: onet_level_value
+        description: "O*NET formal level (0-7). NULL if no match."
 
   # ============================================================
-    #INFO: METRO COMPARE — geographic job market comparison
+  # METRO COMPARE
   # ============================================================
- 
+
   - name: gold_metro_comparison
-    description: 
-      "Geographic job market comparison. One row per state (from Adzuna ge-matching). Joins posting volume and salary data
-      with ACS demographic context from dim_metros. Computes salary to income ratio for purchasing power comparison."
-
-
+    description:
+      "Geographic job market comparison. One row per state.
+      Posting stats joined to ACS demographic context via state_to_cbsa_bridge seed.
+      salary_to_income_ratio is the headline metric: higher = more purchasing power.
+      ACS columns are NULL for states not in the 15 target metros."
+    columns:
+      - name: state
+        data_tests: [not_null]
+      - name: total_postings
+        data_tests: [not_null, positive_value]
+      - name: median_salary
+        description: "NULL if < 5 salary data points."
+      - name: salary_to_income_ratio
+        description: "median_salary / ACS median_household_income."
+      - name: pct_remote
+      - name: cbsa_fips
+        description: "Matched CBSA code. NULL if not a target metro."
+      - name: metro_name
+      - name: median_household_income
+        description: "ACS median household income."
+      - name: pct_bachelors_or_higher
+      - name: pct_work_from_home
+      - name: pct_information_industry
+        description: "Tech density proxy."
 
   # ============================================================
-    #INFO:  SKILLS TRACKER — skills demand over time
+  # SKILLS TRACKER
   # ============================================================
+
   - name: gold_skills_demand
-    description: 
-      "Skills mentioned in job postings tracked over time. One row per skill x month. Feeds the 'Skills Tracker' dashboard page.
-      Computes month over month change and flags trending skills."
+    description:
+      Skills demand over time. One row per skill × month.
+      Filtered to skills with >= 50 total mentions. MoM trending flag.
+    columns:
+      - name: skill_name
+        data_tests: [not_null]
+      - name: report_month
+        data_tests: [not_null]
+      - name: mention_count
+        data_tests: [not_null, positive_value]
+      - name: distinct_postings
+        data_tests: [not_null, positive_value]
+      - name: pct_of_postings
+      - name: mom_change_pct
+      - name: is_trending
+        description: "TRUE if MoM growth > 10% AND mention_count >= 10."
 
-
-
-  # ============================================================
-    #INFO: SKILLS GAP ANALYSIS — O*NET formal vs market demand
-  # ============================================================
   - name: gold_occupation_skills_profile
-    description: 
-      "Bridges O*NET formal skill requirements with actual employer demand from postings. One row per occupation x skill. 
-      Shows both waht government says the job needs and what employers actually ask for, with a gap indicator"
-
+    description:
+      "O*NET formal tech requirements vs actual market demand.
+      One row per occupation × skill. FULL OUTER JOIN between dim_technology_skills
+      and posting skill counts. gap_direction is the headline output:
+      market_only = emerging tools, onet_only = legacy/assumed, aligned = both."
+    columns:
+      - name: onet_soc_code
+        data_tests: [not_null]
+      - name: occupation_title
+      - name: skill_name
+        data_tests: [not_null]
+      - name: in_onet
+        description: "TRUE if O*NET lists this technology."
+      - name: in_market
+        description: "TRUE if postings mention this skill."
+      - name: posting_mention_count
+      - name: posting_pct_of_postings
+      - name: gap_direction
+        description: "market_only, onet_only, or aligned."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['market_only', 'onet_only', 'aligned']
