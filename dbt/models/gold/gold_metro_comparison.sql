@@ -1,12 +1,41 @@
 -- gold_metro_comparison: geographic job market comparison
--- Grain: one row per state
+-- Grain: one row per city × state (for matched metros) or state (for unmatched)
 -- Dashboard: "Metro Compare" — side-by-side metro cards
 
+{{
+    config(
+        materialized='table',
+        tags=['gold']
+    )
+}}
 
-
-WITH geo_postings AS (
+WITH bridge AS (
     SELECT
         LOWER(TRIM(state))                          AS state,
+        LOWER(TRIM(city))                           AS city,
+        TRIM(CAST (cbsa_fips AS VARCHAR(12)))             AS cbsa_fips
+    FROM {{ ref("state_to_cbsa_bridge") }}
+),
+
+-- Pre-join postings to bridge at the posting level so each posting
+-- maps to at most ONE metro (or none). This prevents fan-out.
+postings_with_metro AS (
+    SELECT
+        fp.*,
+        b.cbsa_fips
+    FROM {{ ref("fct_job_postings") }} AS fp
+    LEFT JOIN bridge AS b
+        ON LOWER(TRIM(fp.state)) = b.state
+       AND LOWER(TRIM(fp.city)) = b.city
+    WHERE fp.state IS NOT NULL
+      AND TRIM(fp.state) != ''
+),
+
+-- Aggregate by metro where we have a match, by state where we don't
+geo_postings AS (
+    SELECT
+        LOWER(TRIM(state))                          AS state,
+        cbsa_fips,
         COUNT(*)                                    AS total_postings,
         COUNT(DISTINCT company_name)                AS unique_companies,
 
@@ -18,7 +47,6 @@ WITH geo_postings AS (
         PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY annual_salary_estimate)
                                                     AS salary_p75_raw,
 
-        -- remote via boolean flag
         COUNT(*) FILTER (WHERE is_remote = TRUE)    AS remote_postings,
         ROUND(
             COUNT(*) FILTER (WHERE is_remote = TRUE) * 1.0 / COUNT(*),
@@ -28,19 +56,9 @@ WITH geo_postings AS (
         COUNT(*) FILTER (WHERE data_source = 'adzuna')  AS adzuna_postings,
         COUNT(*) FILTER (WHERE data_source != 'adzuna') AS other_source_postings
 
-    FROM {{ ref("fct_job_postings") }}
-    WHERE state IS NOT NULL
-      AND TRIM(state) != ''
-    GROUP BY 1
+    FROM postings_with_metro
+    GROUP BY 1, 2
     HAVING COUNT(*) >= 5
-),
-
-bridge AS (
-    SELECT
-        LOWER(TRIM(state))                          AS state,
-        LOWER(TRIM(city))                           AS city,
-        TRIM(CAST(cbsa_fips AS VARCHAR))                             AS cbsa_fips
-    FROM {{ ref("state_to_cbsa_bridge") }}
 )
 
 SELECT
@@ -67,7 +85,7 @@ SELECT
     gp.adzuna_postings,
     gp.other_source_postings,
 
-    b.cbsa_fips,
+    gp.cbsa_fips,
     dm.metro_name,
     dm.median_household_income,
 
@@ -86,6 +104,6 @@ SELECT
     dm.mean_commute_minutes
 
 FROM geo_postings AS gp
-LEFT JOIN bridge AS b USING(state)
-LEFT JOIN {{ ref("dim_metros") }} AS dm ON b.cbsa_fips = dm.cbsa_fips
+LEFT JOIN {{ ref("dim_metros") }} AS dm
+    ON gp.cbsa_fips = dm.cbsa_fips
 ORDER BY gp.total_postings DESC
