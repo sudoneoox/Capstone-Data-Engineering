@@ -1,3 +1,8 @@
+-- int_adzuna__postings_enriched
+-- Enriches Adzuna live postings with parsed geo from seed reference.
+-- Deduplicates by posting id (same job can appear across multiple
+-- daily runs or overlapping search queries).
+
 WITH base AS (
 
     SELECT
@@ -16,8 +21,19 @@ WITH base AS (
         (salary_min + salary_max) / 2.0 AS salary_mid,
 
         TRIM(REPLACE(CAST(STRING_SPLIT("location.display_name", ',')->0 AS VARCHAR), '"', '')) AS part_1,
-        TRIM(REPLACE(CAST(STRING_SPLIT("location.display_name", ',')->1 AS VARCHAR), '"', '')) AS part_2
+        TRIM(REPLACE(CAST(STRING_SPLIT("location.display_name", ',')->1 AS VARCHAR), '"', '')) AS part_2,
+
+        -- Deduplicate: keep the most recent fetch of each posting
+        ROW_NUMBER() OVER (
+            PARTITION BY id
+            ORDER BY created DESC
+        ) AS rn
+
     FROM {{ ref("stg_adzuna__postings") }}
+),
+
+deduped AS (
+    SELECT * FROM base WHERE rn = 1
 ),
 
 normalized AS (
@@ -27,7 +43,7 @@ normalized AS (
         LOWER(part_1) AS part_1_norm,
         LOWER(part_2) AS part_2_norm,
         LOWER(raw_location) AS raw_location_norm
-    FROM base
+    FROM deduped
 ),
 -- We will use this seed file to find missing counties, states, or cities and match them
 -- We will also use it to distinguish whether a pairing is state,city or city,county
@@ -130,21 +146,21 @@ final AS (
     FROM matched
 )
 
-SELECT 
-  CAST(id AS VARCHAR) AS posting_id,
-  title AS job_title,
-  description,
-  contract_time AS work_type,
-	company,
-	category_label,
-  CAST(ROUND(salary_max) AS INTEGER) AS salary_max,
-	CAST(ROUND(salary_mid) AS INTEGER) AS salary_mid,
-  CAST(ROUND(salary_min) AS INTEGER) AS salary_min,
-  LOWER(county) AS county,
-  LOWER(city) AS city,
-	LOWER(state) AS state,
-	location,
-  latitude,
-  longitude,
-  created,
+SELECT
+    CAST(id AS VARCHAR) AS posting_id,
+    LOWER(TRIM(title)) AS job_title,
+    TRIM(description) AS description,
+    LOWER(TRIM(contract_time)) AS work_type,
+    LOWER(TRIM(company)) AS company,
+    LOWER(TRIM(category_label)) AS category_label,
+    CAST(ROUND(salary_max) AS INTEGER) AS salary_max,
+    CAST(ROUND(salary_mid) AS INTEGER) AS salary_mid,
+    CAST(ROUND(salary_min) AS INTEGER) AS salary_min,
+    LOWER(TRIM(county)) AS county,
+    LOWER(TRIM(city)) AS city,
+    LOWER(TRIM(state)) AS state,
+    LOWER(TRIM(location)) AS location,
+    latitude,
+    longitude,
+    created
 FROM final
