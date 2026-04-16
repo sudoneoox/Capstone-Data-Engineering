@@ -20,3 +20,5 @@ seeds:
       "15-row bridge connecting Adzunda state city columns to CBSA FIPS codes in dim_metros"
     config:
       schema: raw
+
+  - name: skill_name_normalization
