@@ -22,3 +22,5 @@ seeds:
       schema: raw
 
   - name: skill_name_normalization
+    config:
+      schema: raw

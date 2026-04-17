@@ -6,18 +6,18 @@ WITH education_renamed AS (
 		TRIM("Element ID") AS element_id,
 		TRIM("Element Name") AS element_name,
 		TRIM("Scale ID") AS scale_id,
-		"Category" AS category,
+    {{ col("Category") }} AS category,
 		"Data Value" AS data_value
 	FROM {{ ref("stg_onet__education_training_experience") }}
 	WHERE "Recommend Suppress" <> 'Y'
 ), ete_renamed AS (
 -- Rename the columns for the table we are going to join to make it easier
 	SELECT
-		TRIM("Element ID") AS element_id,
-		TRIM("Element Name") AS element_name,
-		TRIM("Scale ID") AS scale_id,
-		"Category" AS category,
-		TRIM("Category Description") AS category_description
+		TRIM(element_id) AS element_id,
+		TRIM(element_name) AS element_name,
+		TRIM(scale_id) AS scale_id,
+		category,
+		TRIM("category_description") AS category_description
 	FROM {{ ref("stg_onet__ete_categories") }}
 ), joined_tables AS (
 -- We are solely getting the category descriptions to help us pivot the scale_id, filtering for education_requirements only
@@ -26,7 +26,7 @@ WITH education_renamed AS (
 		edu.element_id,
 		edu.element_name,
 		edu.scale_id,
-		CAST(edu.category AS INTEGER) AS category,
+    {{ safe_numeric_cast("edu.category", "INT") }} AS category,
 		edu.data_value,
 		ete.category_description
 	FROM education_renamed AS edu

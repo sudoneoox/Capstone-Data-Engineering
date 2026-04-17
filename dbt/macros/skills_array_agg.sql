@@ -1,5 +1,5 @@
 {% macro skills_array_agg(expr, distinct=true) -%}
-  {{ return(adapter.dispatch('skills_array_agg', 'your_project')(expr, distinct)) }}
+  {{ return(adapter.dispatch('skills_array_agg')(expr, distinct)) }}
 {%- endmacro %}
 
 {% macro duckdb__skills_array_agg(expr, distinct=true) -%}

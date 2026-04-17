@@ -50,7 +50,7 @@ SELECT
     -- no salary data in this dataset
     CAST(NULL AS INTEGER)                           AS annual_salary_estimate,
     -- no description in this dataset
-    CAST(NULL AS VARCHAR)                           AS description,
+    CAST(NULL AS {{ dbt.type_string() }})                           AS description,
     'kaggle_linkedin_large'                         AS data_source
 FROM postings_cleaned AS p
 LEFT JOIN skills_cleaned AS s

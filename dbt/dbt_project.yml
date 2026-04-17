@@ -32,7 +32,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 seeds:
   dbt_datalakehouse:
-    +schema: landing
+    +schema: raw
 
 models:
   dbt_datalakehouse:
@@ -41,12 +41,20 @@ models:
     bronze:
       +materialized: table
       +schema: bronze
+      +tblproperties:
+        delta.columnMapping.mode: "name"
     silver:
       +materialized: table
       +schema: silver
+      +tblproperties:
+        delta.columnMapping.mode: "name"
     gold:
       +materialized: view
       +schema: gold
+      +tblproperties:
+        delta.columnMapping.mode: "name"
+
+
 
 # Project dependencies config
 vars:

@@ -14,7 +14,7 @@
 WITH linkedin_skills AS (
     -- arshkon dataset: skill_abr resolved to full names via mapping
     SELECT
-        CAST(js.job_id AS VARCHAR)                  AS posting_id,
+        CAST(js.job_id AS {{ dbt.type_string() }})                  AS posting_id,
         LOWER(TRIM(ms.skill_name))                  AS skill_name_raw,
         'kaggle_linkedin'                           AS data_source
     FROM {{ ref("stg_kaggle_linkedin__job_skills") }} AS js
@@ -30,10 +30,8 @@ large_skills AS (
         TRIM(job_link)                              AS posting_id,
         LOWER(TRIM(skill))                          AS skill_name_raw,
         'kaggle_linkedin_large'                     AS data_source
-    FROM {{ ref("stg_kaggle_linkedin_large__job_skills") }},
-    {{ explode_csv('job_skills') }}
-    WHERE job_skills IS NOT NULL
-      AND TRIM(job_skills) != ''
+    FROM {{ explode_csv_from(ref("stg_kaggle_linkedin_large__job_skills"), "job_skills", "skill") }}
+    WHERE job_skills IS NOT NULL AND TRIM(job_skills) != ''
 ),
 
 ds_skills AS (
@@ -42,10 +40,8 @@ ds_skills AS (
         TRIM(job_link)                              AS posting_id,
         LOWER(TRIM(skill))                          AS skill_name_raw,
         'kaggle_ds'                                 AS data_source
-    FROM {{ ref("stg_kaggle_ds__job_skills") }},
-    {{ explode_csv('job_skills') }}
-    WHERE job_skills IS NOT NULL
-      AND TRIM(job_skills) != ''
+    FROM {{ explode_csv_from(ref("stg_kaggle_ds__job_skills"), "job_skills", "skill") }}
+    WHERE job_skills IS NOT NULL AND TRIM(job_skills) != ''
 ),
 
 combined_raw AS (

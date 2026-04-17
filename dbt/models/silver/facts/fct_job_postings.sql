@@ -21,8 +21,8 @@ WITH linkedin_arshkon AS (
         annual_salary_estimate,
         CAST(NULL AS INTEGER)                       AS salary_min,
         CAST(NULL AS INTEGER)                       AS salary_max,
-        CAST(NULL AS VARCHAR)                       AS city,
-        CAST(NULL AS VARCHAR)                       AS state,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS city,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS state,
         -- arshkon has an explicit remote flag from the source
         COALESCE(
             is_remote,
@@ -46,8 +46,8 @@ linkedin_large AS (
         annual_salary_estimate,
         CAST(NULL AS INTEGER)                       AS salary_min,
         CAST(NULL AS INTEGER)                       AS salary_max,
-        CAST(NULL AS VARCHAR)                       AS city,
-        CAST(NULL AS VARCHAR)                       AS state,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS city,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS state,
         -- no explicit remote flag, derive from work_type and title
         COALESCE(
             work_type ILIKE '%remote%',
@@ -73,8 +73,8 @@ ds_jobs AS (
         annual_salary_estimate,
         CAST(NULL AS INTEGER)                       AS salary_min,
         CAST(NULL AS INTEGER)                       AS salary_max,
-        CAST(NULL AS VARCHAR)                       AS city,
-        CAST(NULL AS VARCHAR)                       AS state,
+        CAST(NULL AS {{ dbt.type_string() }})                       AS city,
+        CAST(NULL AS {{ dbt.type_string() }})                       AS state,
         COALESCE(
             work_type ILIKE '%remote%',
             job_title ILIKE '%remote%',
@@ -94,7 +94,7 @@ adzuna AS (
         company                                     AS company_name,
         location,
         work_type,
-        CAST(NULL AS VARCHAR)                       AS experience_level,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS experience_level,
         CAST(created AS TIMESTAMP)                  AS posted_at,
         salary_mid                                  AS annual_salary_estimate,
         salary_min,
