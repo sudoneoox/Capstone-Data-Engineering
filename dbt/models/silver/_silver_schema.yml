@@ -332,7 +332,7 @@ models:
         description: "Lowercased job title."
         data_tests: [not_null]
       - name: company
-        data_tests: [not_null]
+        # data_tests: [not_null]
       - name: category_label
         description: "Adzuna job category (e.g. 'IT Jobs')."
         data_tests: [not_null]

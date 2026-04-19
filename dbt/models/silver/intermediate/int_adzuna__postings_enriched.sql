@@ -19,9 +19,9 @@ WITH base AS (
         {{ col("category.label") }} AS category_label,
         CAST(created AS TIMESTAMP) AS created,
         (salary_min + salary_max) / 2.0 AS salary_mid,
-        TRIM(REPLACE(CAST(get(split({{ col("location.display_name") }}, ','), 0) AS {{ dbt.type_string() }}), '"', '')) AS part_1,
-        TRIM(REPLACE(CAST(get(split({{ col("location.display_name") }}, ','), 1) AS {{ dbt.type_string() }}), '"', '')) AS part_2,
-        ROW_NUMBER() OVER (
+    TRIM(REPLACE(CAST({{ split_part_zero_based(col("location.display_name"), "','", 0) }} AS {{ dbt.type_string() }}), '"', '')) AS part_1,
+    TRIM(REPLACE(CAST({{ split_part_zero_based(col("location.display_name"), "','", 1) }} AS {{ dbt.type_string() }}), '"', '')) AS part_2,     
+    ROW_NUMBER() OVER (
             PARTITION BY id
             ORDER BY created DESC
         ) AS rn
