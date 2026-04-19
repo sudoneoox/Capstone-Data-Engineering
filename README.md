@@ -163,7 +163,7 @@ Community Cloud.
 
 ![Dashboard](docs/dashboard_screenshot.png)
 
-![Link](https://job-market-lakehouse.streamlit.app)
+[Link](https://job-market-lakehouse.streamlit.app)
 
 ### Pages
 
