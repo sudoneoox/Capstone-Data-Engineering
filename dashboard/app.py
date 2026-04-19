@@ -18,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-DATA_DIR = Path("data/tableau")
+DATA_DIR = Path("data/dashboard")
 
 
 @st.cache_data
