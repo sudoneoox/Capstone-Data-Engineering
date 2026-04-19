@@ -1,0 +1,2 @@
+[general]
+run = "streamlit run dashboard/app.py --server.headless true"
