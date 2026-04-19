@@ -163,6 +163,8 @@ Community Cloud.
 
 ![Dashboard](docs/dashboard_screenshot.png)
 
+![Link](https://job-market-lakehouse.streamlit.app)
+
 ### Pages
 
 **Market pulse**: KPI cards showing total postings, median salaries, and SOC
