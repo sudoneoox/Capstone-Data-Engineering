@@ -282,3 +282,4 @@ terraform.rc
 # planout
 
 
+!data/dashboard/*.csv

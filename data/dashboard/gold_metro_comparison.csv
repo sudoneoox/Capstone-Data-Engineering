@@ -1,0 +1,15 @@
+state,total_postings,unique_companies,postings_with_salary,median_salary,avg_salary,salary_p25,salary_p75,remote_postings,pct_remote,adzuna_postings,other_source_postings,cbsa_fips,metro_name,median_household_income,salary_to_income_ratio,pct_bachelors_or_higher,pct_work_from_home,pct_information_industry,pct_mgmt_business_science_arts,pct_professional_scientific_management_admin_waste,pct_broadband,acs_unemployment_rate,mean_commute_minutes
+california,190,72,190,177500,177779,141748,223000,2,0.0105,190,0,41860,"San Francisco-Oakland-Fremont, CA Metro Area",133780,1.33,52.4,23.2,4.2,55.0,21.5,94.0,5.4,31.8
+colorado,172,31,172,120156,125745,90007,160000,0,0.0,172,0,19740,"Denver-Aurora-Centennial, CO Metro Area",102339,1.17,48.4,21.2,3.3,49.7,16.9,93.8,4.3,27.3
+texas,160,114,160,118218,119646,92870,146215,1,0.0063,160,0,,,,,,,,,,,,
+texas,148,52,144,120460,122572,89995,157988,8,0.0541,148,0,19100,"Dallas-Fort Worth-Arlington, TX Metro Area",87155,1.38,38.5,15.9,2.1,43.3,14.1,92.5,4.5,28.0
+virginia,127,35,127,119693,120365,98930,141633,0,0.0,127,0,,,,,,,,,,,,
+kansas,76,55,76,122081,127045,103415,150930,1,0.0132,76,0,,,,,,,,,,,,
+pennsylvania,76,55,76,122081,127045,103415,150930,1,0.0132,76,0,,,,,,,,,,,,
+iowa,76,55,76,122081,127045,103415,150930,1,0.0132,76,0,,,,,,,,,,,,
+nebraska,76,55,76,122081,127045,103415,150930,1,0.0132,76,0,,,,,,,,,,,,
+utah,76,55,76,122081,127045,103415,150930,1,0.0132,76,0,,,,,,,,,,,,
+alaska,60,34,60,129692,138592,93025,170226,4,0.0667,60,0,,,,,,,,,,,,
+hawaii,48,31,48,111041,123321,87968,155514,4,0.0833,48,0,,,,,,,,,,,,
+nevada,8,4,8,112491,102582,98166,116907,0,0.0,8,0,,,,,,,,,,,,
+new york,5,4,5,101051,97008,78019,111922,0,0.0,5,0,,,,,,,,,,,,
