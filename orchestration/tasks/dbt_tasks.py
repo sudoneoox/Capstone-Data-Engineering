@@ -36,6 +36,12 @@ def _run_dbt(
 
 
 @task(retries=1, tags=["dbt"])
+def dbt_deps() -> None:
+    """Run dbt deps to get dependencies"""
+    _run_dbt(["seed"])
+
+
+@task(retries=1, tags=["dbt"])
 def dbt_seed() -> None:
     """Run dbt seed to load CSV/txt seeds into warehouse."""
     _run_dbt(["seed"])

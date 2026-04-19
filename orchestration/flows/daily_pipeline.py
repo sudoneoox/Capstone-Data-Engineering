@@ -168,6 +168,7 @@ def transform() -> None:
     Prefect manages stage ordering: dbt manages model dependencies
     """
     from orchestration.tasks.dbt_tasks import (
+        dbt_deps,
         dbt_build_gold,
         dbt_build_silver,
         dbt_build_bronze,
@@ -175,6 +176,7 @@ def transform() -> None:
         dbt_seed,
     )
 
+    dbt_deps()
     dbt_seed()
     dbt_build_bronze()
     dbt_build_silver()
