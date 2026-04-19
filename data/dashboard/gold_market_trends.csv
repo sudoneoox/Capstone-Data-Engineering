@@ -1,0 +1,4 @@
+report_month,data_source,total_postings,unique_companies,postings_with_salary,median_salary,avg_salary,salary_p25,salary_p75,remote_postings,pct_remote,soc_match_rate,postings_mom_change,postings_mom_change_pct,year,quarter,month_num
+2026-03-01 00:00:00,adzuna,104,65,104,150621,151368,111550,191114,1,0.0096,0.0769,,,2026,1,3
+2026-04-01 00:00:00,adzuna,18094,4073,18072,127062,135094,95299,165000,532,0.0294,0.0795,17990,172.9808,2026,2,4
+2024-04-01 00:00:00,kaggle_linkedin,123848,24413,36032,82798,97217,52500,125000,15246,0.1231,0.2065,,,2024,2,4
