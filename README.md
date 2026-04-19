@@ -1,5 +1,5 @@
 # Job Market Intelligence Platform
-
+## Problem Statement
 An end-to-end data engineering project that ingests job market data from 6
 sources (government APIs, live job boards, and historical datasets), transforms
 it through a medallion architecture, and surfaces insights through an
