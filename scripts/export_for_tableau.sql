@@ -1,5 +1,5 @@
--- scripts/export_for_tableau.sql
--- Run: duckdb dbt/lakehouse_dev.duckdb < scripts/export_for_tableau.sql
+-- Export gold tables to CSV for dashboard consumption
+-- Run: duckdb data/lakehouse_dev.duckdb < scripts/export_for_dashboard.sql
 
 COPY (SELECT * FROM gold.gold_market_snapshot)
 TO 'data/tableau/gold_market_snapshot.csv' (HEADER, DELIMITER ',');
