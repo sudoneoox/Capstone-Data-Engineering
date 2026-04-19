@@ -44,25 +44,53 @@ fred:                          #INFO: For macro context
 
 adzuna:                        #INFO: For live demand
   searches:
-    # core data roles
-    - { what: "data engineer", where: "", max_pages: 3 }
-    - { what: "analytics engineer", where: "", max_pages: 3 }
-    - { what: "machine learning engineer", where: "", max_pages: 3 }
+    # Data & Analytics
+    - { what: "data engineer", where: "", max_pages: 10 }
+    - { what: "data scientist", where: "", max_pages: 10 }
+    - { what: "data analyst", where: "", max_pages: 10 }
+    - { what: "analytics engineer", where: "", max_pages: 5 }
+    - { what: "business intelligence", where: "", max_pages: 5 }
+    - { what: "machine learning engineer", where: "", max_pages: 5 }
 
-    # analytics / BI
-    - { what: "\"business intelligence\" analyst", where: "", max_pages: 2 }
-    - { what: "\"analytics manager\"", where: "", max_pages: 2 }
+    # Software Engineering
+    - { what: "software engineer", where: "", max_pages: 10 }
+    - { what: "software developer", where: "", max_pages: 10 }
+    - { what: "frontend developer", where: "", max_pages: 5 }
+    - { what: "backend developer", where: "", max_pages: 5 }
+    - { what: "full stack developer", where: "", max_pages: 5 }
 
-    # platform / infra adjacent
-    - { what: "platform engineer", where: "", max_pages: 2 }
-    - { what: "MLOps engineer", where: "", max_pages: 2 }
+    # Cloud & Infrastructure
+    - { what: "cloud engineer", where: "", max_pages: 5 }
+    - { what: "devops engineer", where: "", max_pages: 5 }
+    - { what: "site reliability engineer", where: "", max_pages: 5 }
+    - { what: "platform engineer", where: "", max_pages: 5 }
 
-    # seniority split
-    - { what: "\"senior data engineer\"", where: "", max_pages: 2 }
-    - { what: "\"entry level data analyst\"", where: "", max_pages: 2 }
+    # Security
+    - { what: "security engineer", where: "", max_pages: 5 }
+    - { what: "cybersecurity analyst", where: "", max_pages: 5 }
+
+    # Management & Architecture
+    - { what: "engineering manager", where: "", max_pages: 5 }
+    - { what: "solutions architect", where: "", max_pages: 5 }
+    - { what: "technical program manager", where: "", max_pages: 5 }
+    - { what: "product manager", where: "", max_pages: 5 }
+
+    # AI / ML
+    - { what: "ai engineer", where: "", max_pages: 5 }
+    - { what: "nlp engineer", where: "", max_pages: 3 }
+    - { what: "computer vision engineer", where: "", max_pages: 3 }
+
+    # Database & Integration
+    - { what: "database administrator", where: "", max_pages: 5 }
+    - { what: "etl developer", where: "", max_pages: 5 }
+
+    # Broader tech roles
+    - { what: "systems administrator", where: "", max_pages: 5 }
+    - { what: "network engineer", where: "", max_pages: 5 }
+    - { what: "IT project manager", where: "", max_pages: 5 }
+    - { what: "QA engineer", where: "", max_pages: 5 }
 
   max_days_old: 30
-
 acs:                           #INFO: For local demographic and workforce structure
   # ACS 5-Year Data Profiles (DP tables)
   # Fetched at the metro (CBSA) level for top tech metros

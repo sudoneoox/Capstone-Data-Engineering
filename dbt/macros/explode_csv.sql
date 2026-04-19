@@ -1,16 +1,11 @@
+{% macro explode_csv(column_name, alias_name='skill') -%}
+  {{ return(adapter.dispatch('explode_csv')(column_name, alias_name)) }}
+{%- endmacro %}
 
-{% macro explode_csv(column_name) %}
-  {{ return(adapter.dispatch('explode_csv')(column_name)) }}
-{% endmacro %}
+{% macro duckdb__explode_csv(column_name, alias_name='skill') -%}
+  unnest(string_split({{ column_name }}, ',')) as {{ alias_name }}
+{%- endmacro %}
 
-{% macro default__explode_csv(column_name) %}
-  LATERAL (SELECT UNNEST(STRING_SPLIT({{ column_name }}, ',')) AS skill)
-{% endmacro %}
-
-{% macro duckdb__explode_csv(column_name) %}
-  LATERAL (SELECT UNNEST(STRING_SPLIT({{ column_name }}, ',')) AS skill)
-{% endmacro %}
-
-{% macro databricks__explode_csv(column_name) %}
-  LATERAL VIEW explode(split({{ column_name }}, ',')) exploded_skills AS skill
-{% endmacro %}
+{% macro databricks__explode_csv(column_name, alias_name='skill') -%}
+  explode(split({{ column_name }}, ',')) as {{ alias_name }}
+{%- endmacro %}

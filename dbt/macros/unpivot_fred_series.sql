@@ -1,17 +1,22 @@
-
 {% macro unpivot_fred_series(relation, date_column, series_columns) %}
   {{ return(adapter.dispatch('unpivot_fred_series')(relation, date_column, series_columns)) }}
 {% endmacro %}
 
 {% macro duckdb__unpivot_fred_series(relation, date_column, series_columns) %}
-    UNPIVOT {{ relation }}
-    ON
-    {%- for col in series_columns %}
-        "{{ col }}"{% if not loop.last %}, {% endif %}
+(
+    {%- for col_name in series_columns %}
+    SELECT
+        {{ date_column }} AS date_raw,
+        '{{ col_name }}' AS series_id,
+        "{{ col_name }}" AS value
+    FROM {{ relation }}
+    {%- if not loop.last %}
+
+    UNION ALL
+
+    {%- endif %}
     {%- endfor %}
-    INTO
-        NAME series_id
-        VALUE value
+)
 {% endmacro %}
 
 {% macro default__unpivot_fred_series(relation, date_column, series_columns) %}
@@ -22,11 +27,11 @@
 
 {% macro databricks__unpivot_fred_series(relation, date_column, series_columns) %}
 (
-    {%- for col in series_columns %}
+    {%- for col_name in series_columns %}
     SELECT
-        {{ date_column }} AS {{ date_column }},
-        '{{ col }}' AS series_id,
-        {{ col }} AS value
+        {{ date_column }} AS date_raw,
+        '{{ col_name }}' AS series_id,
+        {{ col_name }} AS value
     FROM {{ relation }}
     {%- if not loop.last %}
 

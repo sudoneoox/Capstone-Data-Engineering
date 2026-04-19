@@ -6,33 +6,36 @@ WITH education_renamed AS (
 		TRIM("Element ID") AS element_id,
 		TRIM("Element Name") AS element_name,
 		TRIM("Scale ID") AS scale_id,
-		"Category" AS category,
+    {{ col("Category") }} AS category,
 		"Data Value" AS data_value
 	FROM {{ ref("stg_onet__education_training_experience") }}
 	WHERE "Recommend Suppress" <> 'Y'
 ), ete_renamed AS (
 -- Rename the columns for the table we are going to join to make it easier
-	SELECT
-		TRIM("Element ID") AS element_id,
-		TRIM("Element Name") AS element_name,
-		TRIM("Scale ID") AS scale_id,
-		"Category" AS category,
-		TRIM("Category Description") AS category_description
-	FROM {{ ref("stg_onet__ete_categories") }}
+  SELECT
+      TRIM("Element ID") AS element_id,
+      TRIM("Element Name")AS element_name,
+      TRIM("Scale ID") AS scale_id,
+      {{ safe_numeric_cast(col("Category"), "INT") }} AS category,
+      TRIM({{ col("Category Description") }}) AS category_description
+  FROM {{ ref("stg_onet__ete_categories") }}
 ), joined_tables AS (
 -- We are solely getting the category descriptions to help us pivot the scale_id, filtering for education_requirements only
-	SELECT
-		edu.onet_soc_code,
-		edu.element_id,
-		edu.element_name,
-		edu.scale_id,
-		CAST(edu.category AS INTEGER) AS category,
-		edu.data_value,
-		ete.category_description
-	FROM education_renamed AS edu
-	INNER JOIN ete_renamed AS ete
-	USING(element_id, element_name, scale_id, category)
-	WHERE edu.scale_id = 'RL'
+  SELECT
+      edu.onet_soc_code,
+      edu.element_id,
+      edu.element_name,
+      edu.scale_id,
+      edu.category,
+      edu.data_value,
+      ete.category_description
+  FROM education_renamed AS edu
+  INNER JOIN ete_renamed AS ete
+      ON edu.element_id = ete.element_id
+     AND edu.element_name = ete.element_name
+     AND edu.scale_id = ete.scale_id
+     AND edu.category = ete.category
+  WHERE edu.scale_id = 'RL'
 ), pivoted AS (
 -- Pivot categories into their respective percentages
 	SELECT

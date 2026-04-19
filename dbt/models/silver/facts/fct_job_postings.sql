@@ -1,8 +1,6 @@
 -- fct_job_postings: unified job postings fact table
 -- Unions: arshkon LinkedIn, asaniczka 1.3M LinkedIn, asaniczka data science, Adzuna
 -- Left joins to int_title_to_soc_mapping for occupation classification
--- Each source is normalized to a common schema with NULLs where data doesn't exist
-
 {{
     config(
         materialized='table',
@@ -23,8 +21,14 @@ WITH linkedin_arshkon AS (
         annual_salary_estimate,
         CAST(NULL AS INTEGER)                       AS salary_min,
         CAST(NULL AS INTEGER)                       AS salary_max,
-        CAST(NULL AS VARCHAR)                       AS city,
-        CAST(NULL AS VARCHAR)                       AS state,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS city,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS state,
+        -- arshkon has an explicit remote flag from the source
+        COALESCE(
+            is_remote,
+            work_type ILIKE '%remote%'
+        )                                           AS is_remote,
+        FALSE                                       AS is_snapshot,
         data_source
     FROM {{ ref("int_kaggle_linkedin__postings_enriched") }}
 ),
@@ -42,8 +46,16 @@ linkedin_large AS (
         annual_salary_estimate,
         CAST(NULL AS INTEGER)                       AS salary_min,
         CAST(NULL AS INTEGER)                       AS salary_max,
-        CAST(NULL AS VARCHAR)                       AS city,
-        CAST(NULL AS VARCHAR)                       AS state,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS city,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS state,
+        -- no explicit remote flag, derive from work_type and title
+        COALESCE(
+            work_type ILIKE '%remote%',
+            job_title ILIKE '%remote%',
+            FALSE
+        )                                           AS is_remote,
+        -- all first_seen = January 2024, this is a snapshot not a time-series
+        TRUE                                        AS is_snapshot,
         data_source
     FROM {{ ref("int_kaggle_large__postings_enriched") }}
 ),
@@ -61,8 +73,15 @@ ds_jobs AS (
         annual_salary_estimate,
         CAST(NULL AS INTEGER)                       AS salary_min,
         CAST(NULL AS INTEGER)                       AS salary_max,
-        CAST(NULL AS VARCHAR)                       AS city,
-        CAST(NULL AS VARCHAR)                       AS state,
+        CAST(NULL AS {{ dbt.type_string() }})                       AS city,
+        CAST(NULL AS {{ dbt.type_string() }})                       AS state,
+        COALESCE(
+            work_type ILIKE '%remote%',
+            job_title ILIKE '%remote%',
+            FALSE
+        )                                           AS is_remote,
+        -- same author as large, same snapshot issue
+        TRUE                                        AS is_snapshot,
         data_source
     FROM {{ ref("int_kaggle_ds__postings_enriched") }}
 ),
@@ -75,18 +94,26 @@ adzuna AS (
         company                                     AS company_name,
         location,
         work_type,
-        CAST(NULL AS VARCHAR)                       AS experience_level,
+        CAST(NULL AS {{ dbt.type_string() }} )                       AS experience_level,
         CAST(created AS TIMESTAMP)                  AS posted_at,
         salary_mid                                  AS annual_salary_estimate,
         salary_min,
         salary_max,
         city,
         state,
+        -- Adzuna: derive from work_type, title, and location
+        COALESCE(
+            work_type ILIKE '%remote%',
+            job_title ILIKE '%remote%',
+            location ILIKE '%remote%',
+            FALSE
+        )                                           AS is_remote,
+        -- Adzuna is live collection, not a snapshot
+        FALSE                                       AS is_snapshot,
         'adzuna'                                    AS data_source
     FROM {{ ref("int_adzuna__postings_enriched") }}
 ),
 
--- Stack all sources
 all_postings AS (
     SELECT * FROM linkedin_arshkon
     UNION ALL
@@ -97,7 +124,6 @@ all_postings AS (
     SELECT * FROM adzuna
 ),
 
--- Attempt SOC code matching via exact title match
 with_soc AS (
     SELECT
         p.*,
@@ -126,6 +152,8 @@ SELECT
     annual_salary_estimate,
     salary_min,
     salary_max,
+    is_remote,
+    is_snapshot,
     onet_soc_code,
     soc_code,
     soc_match_type,

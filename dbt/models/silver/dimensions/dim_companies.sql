@@ -21,8 +21,7 @@ WITH companies_cleaned AS (
 industries_agg AS (
     SELECT
         CAST(company_id AS BIGINT)                  AS company_id,
-        STRING_AGG(DISTINCT LOWER(TRIM(industry)), ', ' ORDER BY LOWER(TRIM(industry)))
-                                                    AS industries
+        {{ string_agg_sorted_distinct("LOWER(TRIM(industry))") }} AS industries        
     FROM {{ ref("stg_kaggle_linkedin__company_industries") }}
     WHERE industry IS NOT NULL
       AND TRIM(industry) != ''
@@ -33,8 +32,7 @@ industries_agg AS (
 specialties_agg AS (
     SELECT
         CAST(company_id AS BIGINT)                  AS company_id,
-        STRING_AGG(DISTINCT LOWER(TRIM(speciality)), ', ' ORDER BY LOWER(TRIM(speciality)))
-                                                    AS specialties
+        {{ string_agg_sorted_distinct("LOWER(TRIM(speciality))") }} AS specialties
     FROM {{ ref("stg_kaggle_linkedin__company_specialties") }}
     WHERE speciality IS NOT NULL
       AND TRIM(speciality) != ''

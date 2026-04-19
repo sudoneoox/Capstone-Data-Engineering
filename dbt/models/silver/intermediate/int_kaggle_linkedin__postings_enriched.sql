@@ -172,7 +172,7 @@ skill_mapping_join AS (
 -- INFO: =============================== FINAL JOIN ====================================
 -- Join postings with salary and skills, normalize all text columns
 SELECT
-    CAST(p.job_id AS VARCHAR)                       AS posting_id,
+    CAST(p.job_id AS {{ dbt.type_string() }})                       AS posting_id,
     LOWER(TRIM(p.title))                            AS job_title,
     TRIM(p.description)                             AS description,
     LOWER(TRIM(p.location))                         AS location,
@@ -181,12 +181,12 @@ SELECT
     LOWER(TRIM(p.formatted_work_type))              AS work_type,
     LOWER(TRIM(p.formatted_experience_level))       AS experience_level,
     -- listed_time is epoch milliseconds, convert to timestamp
-    CASE
-        WHEN p.listed_time IS NOT NULL AND p.listed_time > 0
-        THEN CAST(EPOCH_MS(CAST(p.listed_time AS BIGINT)) AS TIMESTAMP)
-        ELSE NULL
-    END                                             AS posted_at,
-    CAST(p.remote_allowed AS BOOLEAN)               AS is_remote,
+  CASE
+      WHEN p.listed_time IS NOT NULL AND p.listed_time > 0
+      THEN CAST({{ epoch_ms_to_timestamp("CAST(p.listed_time AS BIGINT)") }} AS TIMESTAMP)
+      ELSE NULL
+  END                                               AS posted_at,    
+  CAST(p.remote_allowed AS BOOLEAN)                 AS is_remote,
     CAST(p.views AS INTEGER)                        AS view_count,
     CAST(p.applies AS INTEGER)                      AS apply_count,
     sal.annual_salary_estimate,

@@ -9,23 +9,22 @@
     )
 }}
 
-WITH series_names AS (
-    -- Map known series IDs to readable names
-    -- This acts as an inline reference table — if you add new series to
-    -- conf/ingestion.yml, add the mapping here too
-    SELECT col0 AS series_id, col1 AS series_name FROM (VALUES
-        ('LNS14000000',               'unemployment rate'),
-        ('CES0000000001',             'total nonfarm employment'),
-        ('CES6500000001',             'tech sector employment'),
-        ('LNS11300060',               'labor force participation 25-54'),
-        ('LNS12300060',               'employment-population ratio 25-54'),
-        ('JTS000000000000000JOL',     'jolts job openings'),
-        ('JTS000000000000000HIR',     'jolts hires'),
-        ('JTS000000000000000QUL',     'jolts quits'),
-        ('JTS000000000000000LDL',     'jolts layoffs and discharges'),
-        ('JTS000000000000000TSL',     'jolts total separations')
-    )
-),
+{% set bls_series_rows = [
+    ('LNS14000000', 'unemployment rate'),
+    ('CES0000000001', 'total nonfarm employment'),
+    ('CES6500000001', 'tech sector employment'),
+    ('LNS11300060', 'labor force participation 25-54'),
+    ('LNS12300060', 'employment-population ratio 25-54'),
+    ('JTS000000000000000JOL', 'jolts job openings'),
+    ('JTS000000000000000HIR', 'jolts hires'),
+    ('JTS000000000000000QUL', 'jolts quits'),
+    ('JTS000000000000000LDL', 'jolts layoffs and discharges'),
+    ('JTS000000000000000TSL', 'jolts total separations')
+] %}
+-- This acts as an inline reference table — if you add new series to
+-- conf/ingestion.yml, add the mapping here too
+
+WITH series_names AS {{ inline_mapping_2col(bls_series_rows, 'series_id', 'series_name') }},    -- Map known series IDs to readable names
 
 raw_observations AS (
     SELECT
